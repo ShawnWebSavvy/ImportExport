@@ -47,6 +47,8 @@ Route::post('file-export-botswana-install-trailers', [FileController::class, 'fi
 Route::get('file-export-botswana-user-trailers-index', [FileController::class, 'fileExportBotswanaUserTrailersIndex'])->name('file-export-botswana-user-trailers-index');
 Route::post('file-export-botswana-user-trailers', [FileController::class, 'fileExportBotswanaUserTrailers'])->name('file-export-botswana-user-trailers');
 
+Route::get('file-export-botswana-index', [FileController::class, 'fileExportBotswanaIndex'])->name('file-export-botswana-index');
+Route::post('file-export-botswana', [FileController::class, 'fileExportBotswana'])->name('file-export-botswana');
 
 
 /*

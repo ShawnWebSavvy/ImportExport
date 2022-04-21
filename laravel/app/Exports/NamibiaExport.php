@@ -89,6 +89,7 @@ class NamibiaExport implements FromCollection, WithHeadings
                     'CollectionReason' => $value->CollectionReason,
                     'ActionDate' => $actionDate, 
                     'RecipientAccountHolderAbbreviatedName' => 'XXLWNAMI', 
+                    'batch_number' => $value->batch_number,
                 )
             );
         }

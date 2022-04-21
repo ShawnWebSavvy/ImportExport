@@ -6,6 +6,7 @@ use Spatie\SimpleExcel\SimpleExcelReader;
 use Spatie\SimpleExcel\SimpleExcelWriter;
 use Illuminate\Support\Facades\DB;
 use App\Models\FileImportNamibia;
+use App\Models\FileImportBotswana;
 use App\Models\FileImportBotswanaRecordUserTrailer;
 use App\Models\FileImportBotswanaRecordUserHeader;
 use App\Models\FileImportBotswanaRecordTransaction;
@@ -13,6 +14,7 @@ use App\Models\FileImportBotswanaRecordInstallTrailer;
 use App\Models\FileImportBotswanaRecordInstallHeader;
 use App\Models\FileImportBotswanaRecordContra;
 use App\Exports\NamibiaExport;
+use App\Exports\BotswanaExport;
 use App\Exports\BotswanaRecordUserTrailerExport;
 use App\Exports\BotswanaRecordUserHeaderExport;
 use App\Exports\BotswanaRecordTransactionExport;
@@ -61,6 +63,7 @@ class FileController extends Controller
     private $rows = 0;
     private $date;
     private $account_number;
+    public $guid;
 
     public function fileImportIndex(){
        return view('FileImport.file-import');
@@ -71,8 +74,14 @@ class FileController extends Controller
         $pathToFile = $request->file('file');
 
         if($request->file_type == 'Namibia'){
-            $guid = $this->get_guid();
-
+            /*
+            $dateNow = date('Y-m-d');
+            $guid1 = $this->get_guid();
+            $guid2 = $this->get_guid();
+            $GLOBALS['guid'] = $dateNow.'|'.str_shuffle($guid1.$guid2);
+            */
+            $GLOBALS['guid'] = $this->get_guid();
+            
             $rows = SimpleExcelReader::create($pathToFile, 'csv')
             ->noHeaderRow()
             ->skip(1)
@@ -87,6 +96,13 @@ class FileController extends Controller
                         $account_number = $rowProperties[0];
                     } 
                 } else {
+
+                    $__Fake__Demo__Array = [
+                        '20220401', '20220402', '20220403', '20220404', '20220405', '20220406', '20220407', '20220408', '20220409', '20220410', '20220411', '20220412', 
+                    ];
+                    shuffle($__Fake__Demo__Array);
+
+
                     DB::table('file_import_namibias')->insert(
                         array(
                             'RecipientAccountHolderName' => $rowProperties[0],
@@ -97,13 +113,62 @@ class FileController extends Controller
                             'ContractReference' => $rowProperties[5],
                             'Tracking' => $rowProperties[6], 
                             'CollectionReason' => '21', 
-                            'ActionDate' => '20220403', 
+                            // ---> set date using $__Fake__Demo__Array ---> //
+                            'ActionDate' => $__Fake__Demo__Array[0], 
+                            // ---> set date using $__Fake__Demo__Array ---> //
                             'RecipientAccountHolderAbbreviatedName' => 'XXLWNAMI', 
+                            'batch_number' => $GLOBALS['guid'], 
                         )
                     );
                 }
             });
             return redirect()->route('file-export-namibia-index');
+        } elseif($request->file_type == 'Botswana'){
+            $dateNow = date('Y-m-d');
+            $guid1 = $this->get_guid();
+            $guid2 = $this->get_guid();
+            $GLOBALS['guid'] = $dateNow.'|'.str_shuffle($guid1.$guid2);
+            
+            $rows = SimpleExcelReader::create($pathToFile, 'xlsx')
+            ->noHeaderRow()
+            ->skip(2)
+            ->getRows();
+
+            $rows->each(function(array $rowProperties) {
+                DB::table('file_import_botswanas')->insert(
+                    array(
+                        'RecipientAccountHolderName' => $rowProperties[0],
+                        'RecipientAccountHolderSurname' => $rowProperties[1],
+                        'RecipientAccountHolderInitials' => $rowProperties[2],
+                        'RecipientID' => $rowProperties[3],
+                        'BranchCode' => $rowProperties[4],
+                        'RecipientAccountNumber' => $rowProperties[5],
+                        'RecipientNonStandardAccountNumber' => $rowProperties[6], 
+                        'RecipientAccountType' => $rowProperties[7], 
+                        'AccountReference' => $rowProperties[8], 
+                        'RecipientAmount' => $rowProperties[9], 
+                        'PolicyNumber' => $rowProperties[10],
+                        'ActionDate' => $rowProperties[11], 
+                        'Guid' => $GLOBALS['guid'], 
+                    )
+                );
+            });
+
+
+            
+            return redirect()->route('file-export-botswana-index');
+
+
+
+            /*
+
+
+            SQLSTATE[42S02]: Base table or view not found: 1146 Table 'laravel.file_import_botswanas' doesn't exist 
+            (SQL: insert into `file_import_botswanas` (`RecipientAccountHolderName`) 
+            values (Shawn 3;Whelan 3;SPW;8202275195083;100003;12345678903;;1;AccountReference 3;1053.59;P0008883;20220403;;;))
+
+
+            */
         } elseif($request->file_type == 'BotswanaInstallHeaderRecord'){
             //INSTALLATION HEADER RECORD // 021001        40550021yymmddyymmdd000118000180MAGTAPE
             $rows = SimpleExcelReader::create($pathToFile, 'csv')
@@ -113,6 +178,7 @@ class FileController extends Controller
 
             $rows->each(function(array $rowProperties) {
                 $str = $rowProperties[0];
+                dd($str);
 
                 $RecordIdentifier = substr($str, 0, 2); 
                 $VolumeNumber = substr($str, 2, 4); 
@@ -433,6 +499,30 @@ class FileController extends Controller
         $downloadDocName = 'NamibiaExport_'.date("Y_m_d").'.xlsx';
         return Excel::download(new NamibiaExport, $downloadDocName);
     }
+
+    // +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+= //
+
+    public function fileExportBotswanaIndex() { // View Data for Export - Botswana //
+        $table = FileImportBotswana::latest()->paginate(15);
+        return view('FileImport.file-export-botswana-index',compact('table'))
+            ->with('i', (request()->input('page', 1) - 1) * 5);
+    }
+
+    public function fileExportBotswana(Request $request) {  // Export - Botswana // actionDateFrom  actionDateTo
+        // unable to pass value in Excel function - but can call sql commands
+        $actionDateFrom = $request->actionDateFrom;
+        $actionDateTo = $request->actionDateTo;
+
+        DB::table('export_fields')->delete();
+        $values = array('dateField_1' => $actionDateFrom,'dateField_2' => $actionDateTo);
+        DB::table('export_fields')->insert($values);
+
+        $downloadDocName = 'BotswanaExport_'.date("Y_m_d").'.xlsx';
+        return Excel::download(new BotswanaExport, $downloadDocName);
+    }
+
+    // +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+= //
+
     public function fileExportBotswanaInstallHeadersIndex() { // View Data for Export - Botswana - InstallHeaders //
         $table = FileImportBotswanaRecordInstallHeader::latest()->paginate(15);
         return view('FileImport.file-export-botswanaInstallHeader-index',compact('table'))

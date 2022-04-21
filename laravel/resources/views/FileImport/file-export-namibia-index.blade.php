@@ -30,6 +30,7 @@ Namibia
         <th>Tracking</th>
         <th>Abbreviated Name</th>
         <th>Collection</th>
+        <th>Batch ID</th>
     </tr>
     @foreach ($namibia_table as $row)
     <tr>
@@ -43,6 +44,7 @@ Namibia
         <td>{{ $row->Tracking }}</td>
         <td>{{ $row->RecipientAccountHolderAbbreviatedName }}</td>
         <td>{{ $row->CollectionReason }}</td>
+        <td>{{ $row->batch_number }}</td>
     </tr>
     @endforeach
 </table>
