@@ -266,8 +266,6 @@ class BotswanaExport implements FromCollection, WithHeadings
             }
             return [$std_transaction_record]; // default row return
         });
-        //DB::table('file_import_botswanas')->whereBetween('ActionDate', [$actionDateFrom, $actionDateTo])->delete();
-        /*
         // delete the exported rows from table
         DB::table('file_import_botswanas')->whereBetween('ActionDate', [$actionDateFrom, $actionDateTo])->delete();
         // move all exported rows to archive for reference
@@ -290,7 +288,7 @@ class BotswanaExport implements FromCollection, WithHeadings
                     'Guid' => $value->Guid,
                 )
             );
-        } */
+        } 
         return $array;
     }
 }
