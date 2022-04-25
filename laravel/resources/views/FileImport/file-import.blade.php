@@ -7,6 +7,7 @@
         <a class="btn btn-success" href="{{ route('file-export-namibia-index') }}">Namibia</a>
         <h5>Botswana</h5>
         <a class="btn btn-success" href="{{ route('file-export-botswana-index') }}">Botswana</a>
+        <!--
         <h5>Botswana</h5>
         <a class="btn btn-success" href="{{ route('file-export-botswana-install-headers-index') }}">Install Header</a>
         <a class="btn btn-success" href="{{ route('file-export-botswana-user-headers-index') }}">User Header</a>
@@ -14,6 +15,7 @@
         <a class="btn btn-success" href="{{ route('file-export-botswana-transactions-index') }}">Transactions</a>
         <a class="btn btn-success" href="{{ route('file-export-botswana-install-trailers-index') }}">Install Trailers</a>
         <a class="btn btn-success" href="{{ route('file-export-botswana-user-trailers-index') }}">User Trailers</a>
+        -->
     </div>
 
     <div class="container mt-5 text-left">
@@ -34,7 +36,7 @@
 
                                     <input type="radio" id="Botswana" name="file_type" value="Botswana" checked='checked'>
                                     <label for="Botswana">Botswana</label><br>
-
+                                    <!--
                                     <input type="radio" id="BotswanaInstallHeaderRecord" name="file_type" value="BotswanaInstallHeaderRecord">
                                     <label for="BotswanaInstallHeaderRecord">BotswanaInstallHeaderRecord</label><br>
                                     <input type="radio" id="BotswanaUserHeaderRecord" name="file_type" value="BotswanaUserHeaderRecord">
@@ -47,6 +49,7 @@
                                     <label for="BotswanaUserTrailers">BotswanaUserTrailers</label><br>
                                     <input type="radio" id="BotswanaInstallTrailers" name="file_type" value="BotswanaInstallTrailers">
                                     <label for="BotswanaInstallTrailers">BotswanaInstallTrailers</label><br>
+                                    -->
                                 </div>
 
                                 <div class="col-md-6">

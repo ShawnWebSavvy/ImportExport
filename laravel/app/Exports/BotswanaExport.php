@@ -36,7 +36,7 @@ class BotswanaExport implements FromCollection, WithHeadings
         $zero = '0000';
         $generation_number = $zero . $generation_number;
         $generation_number = substr($generation_number, $str_length, 4);
-
+        
         // make global to insert call from trailer (footer) function
         $GLOBALS['generation_number'] = $generation_number;
         // insert generation number, to keep refernce
@@ -61,7 +61,7 @@ class BotswanaExport implements FromCollection, WithHeadings
         $GLOBALS['actionDateFirst'] = $actionDateFrom = substr($actionDateFrom, 2); 
 
         //create teh headers
-        $installHeaderRecord = '021001........G9710021'.$dateNow.$purgeDate.$generation_number.'18000180MAGTAPE   ';
+        $installHeaderRecord = '021001        G9710021'.$dateNow.$purgeDate.$generation_number.'18000180MAGTAPE   ';
         $userHeaderRecord = '04G971'.$dateNow.$purgeDate.$actionDateFrom.$actionDateTo.'000001'.$generation_number.'SAMEDAY   ';
 
         $installHeaderRecord = [$installHeaderRecord];
@@ -117,7 +117,7 @@ class BotswanaExport implements FromCollection, WithHeadings
         // set global values, ****** -> as I am unable to edit the next function, to pass values --- $array = $export->map(function ($export, $key) { ---
         $count = count($export) - 1;
         $GLOBALS['count'] = $count;
-        $GLOBALS['sequenceNumber'] = 0;
+        $GLOBALS['sequenceNumber'] = -1;
         $GLOBALS['transactionCounter'] = 0;
         $GLOBALS['setDate'] = '';
         $GLOBALS['totalContra'] = count($GLOBALS['actionDateTotal']);
@@ -127,6 +127,8 @@ class BotswanaExport implements FromCollection, WithHeadings
             $GLOBALS['sequenceNumber'] = $GLOBALS['sequenceNumber'] + 1;
             $GLOBALS['transactionCounter'] = $GLOBALS['transactionCounter'] + 1;
 
+            //dd($GLOBALS['sequenceNumber']); 
+            
             // most values have to be set to a specific length, below is an example of values set to a specific length
             $amount = $export->RecipientAmount;
             $amount = str_replace(".","",$amount);
@@ -152,10 +154,16 @@ class BotswanaExport implements FromCollection, WithHeadings
             $RecipientNonStandardAccountNumber = $zero . $RecipientNonStandardAccountNumber;
             $RecipientNonStandardAccountNumber = substr($RecipientNonStandardAccountNumber, $str_length, 20);
 
+            /*
             $std_transaction_record = [
                 '502506450200076260G971'.$GLOBALS['sequenceNumber'].$export->BranchCode.$export->RecipientAccountNumber.$export->RecipientAccountType.$amount.$export->RecipientAccountType.$actionDate
                 .'210000LEGAL EXPE '.$export->PolicyNumber.' '.$recipientSurname_Initials.'               '.$export->RecipientNonStandardAccountNumber
                 .'               21            '];
+                */
+                $std_transaction_record = [
+                    '502506450200076260G971000001'.$export->BranchCode.$export->RecipientAccountNumber.$export->RecipientAccountType.$amount.$export->RecipientAccountType.$actionDate
+                    .'210000LEGAL EXPE '.$export->PolicyNumber.' '.$recipientSurname_Initials.'               '.$export->RecipientNonStandardAccountNumber
+                    .'               21            '];
 
             // this will be blank on 1st run, set the date to the current action date
             if($GLOBALS['setDate'] == ''){
@@ -183,7 +191,7 @@ class BotswanaExport implements FromCollection, WithHeadings
                 
                 // increment $GLOBALS['sequenceNumber'] for the Contra Record
                 $GLOBALS['sequenceNumber'] = $GLOBALS['sequenceNumber'] + 1;
-
+                
                 $contra_record = [
                     '52250645020000762604055'.$GLOBALS['sequenceNumber'].'250645020000762601'.$amount.$setDate
                     .'100000LEGAL EXPECONTRA    NOR'.$GLOBALS['sequenceNumber'].'LEGAL EXPENSES INSURANCE SOUTH                                                  '];
@@ -212,6 +220,8 @@ class BotswanaExport implements FromCollection, WithHeadings
                 $setDate = implode("", $setDate);
                 $setDate = substr($setDate, 2); 
 
+                $GLOBALS['sequenceNumber'] = $GLOBALS['sequenceNumber'] + 2;
+
                 $contra_record = [
                     '52250645020000762604055'.$GLOBALS['sequenceNumber'].'250645020000762601'.$amount.$setDate
                     .'100000LEGAL EXPECONTRA    NOR'.$GLOBALS['sequenceNumber'].' LEGAL EXPENSES INSURANCE SOUTH                                                  '];
@@ -229,22 +239,34 @@ class BotswanaExport implements FromCollection, WithHeadings
                 $transactionCounter = substr($transactionCounter, $str_length, 6);
 
                 $totalContra = $GLOBALS['totalContra'];
+                $totalContra = $totalContra + 1;
                 $str_length = strlen($totalContra);
                 $zero = '000000';
                 $totalContra = $zero . $totalContra;
                 $totalContra = substr($totalContra, $str_length, 6);
 
+                /*
                 $user_trailer_record = [
                     '92G971'.$GLOBALS['sequenceNumber'].$GLOBALS['actionDateFirst'].$GLOBALS['purgeDate'].$transactionCounter.'000000'.$totalContra.$amount.$amount.'#Hash#Total#'];
+                    */
+                $GLOBALS['sequenceNumber'] = $GLOBALS['sequenceNumber'] + 1;
+
+                $str_length = strlen($GLOBALS['sequenceNumber']);
+                $zero = '000000';
+                $sequenceNumber = $zero . $GLOBALS['sequenceNumber'];
+                $sequenceNumber = substr($sequenceNumber, $str_length, 6);
+
+                $user_trailer_record = [
+                    '92G971000001'.$sequenceNumber.$GLOBALS['actionDateFirst'].$GLOBALS['purgeDate'].$transactionCounter.'000000'.$totalContra.$amount.$amount.'#Hash#Total#'];    
 
                 $install_trailer_record = [
-                    '941001........G9710021'.$GLOBALS['dateNow'].$GLOBALS['purgeDate'].$GLOBALS['generation_number'].'18000180MAGTAPE   '];
+                    '941001        G9710021'.$GLOBALS['dateNow'].$GLOBALS['purgeDate'].$GLOBALS['generation_number'].'18000180MAGTAPE   '];
 
                 return [$std_transaction_record, $contra_record, $user_trailer_record, $install_trailer_record];
             }
             return [$std_transaction_record]; // default row return
         });
-        DB::table('file_import_botswanas')->whereBetween('ActionDate', [$actionDateFrom, $actionDateTo])->delete();
+        //DB::table('file_import_botswanas')->whereBetween('ActionDate', [$actionDateFrom, $actionDateTo])->delete();
         /*
         // delete the exported rows from table
         DB::table('file_import_botswanas')->whereBetween('ActionDate', [$actionDateFrom, $actionDateTo])->delete();
@@ -272,12 +294,6 @@ class BotswanaExport implements FromCollection, WithHeadings
         return $array;
     }
 }
-
-
-
-
-
-
 
 
 
