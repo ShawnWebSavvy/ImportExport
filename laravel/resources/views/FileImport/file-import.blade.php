@@ -52,6 +52,7 @@
                                     -->
                                 </div>
 
+
                                 <div class="col-md-6">
                                     <div class="form-group mb-4" style="max-width: 500px; margin: 0 auto;">
                                         <div class="custom-file text-left">
@@ -61,13 +62,50 @@
                                         <button class="btn btn-primary">Import data</button>
                                     </div>
                                 </div>
+                                
                             </div>
-                        </div>
-                        <div class="col-md-2">
                         </div>
                     </div>
                 </div>
             </div>
         </form>
+
+        <form action="{{ route('file-export-botswana-totext') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            <div class="row">
+                <div class="col-md-2">
+                </div>
+                <div class="col-md-8">
+                    <div class="row">
+                        <div class="col-md-6">
+                            Botswana XLSX to Text
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group mb-4" style="max-width: 500px; margin: 0 auto;">
+                                <div class="custom-file text-left">
+                                    <input type="file" name="file" class="custom-file-input" id="customFile">
+                                    <label class="custom-file-label" for="customFile">Choose file</label>
+                                </div>
+                                <button class="btn btn-primary">Import data</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <div class="row">
+            <div class="col-md-2">
+            </div>
+            <div class="col-md-8">
+                @if($errors->any())
+                    <h5>{{$errors->first()}}</h5>
+                @endif
+            </div>
+        </div>
+
     </div>
 @endsection
+
+

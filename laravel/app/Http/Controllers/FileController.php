@@ -70,9 +70,13 @@ class FileController extends Controller
     }
 
     public function fileUpload(Request $request) {
-        //dd($request->file_type);
-        $pathToFile = $request->file('file');
+        // check if file uploaded
+        if (!$request->hasFile('file')) {
+            return view('FileImport.file-import')->withErrors(['msg' => 'Please select a file to upload']);
+        }
 
+        $pathToFile = $request->file('file');
+        
         if($request->file_type == 'Namibia'){
             /*
             $dateNow = date('Y-m-d');
@@ -86,7 +90,7 @@ class FileController extends Controller
             ->noHeaderRow()
             ->skip(1)
             ->getRows();
-    
+            dd('qq');
             $rows->each(function(array $rowProperties) {
                 $count = ++$this->rows;
                 if($count < 4){
@@ -96,7 +100,7 @@ class FileController extends Controller
                         $account_number = $rowProperties[0];
                     } 
                 } else {
-
+                    // dates, as they would be in the document 
                     $__Fake__Demo__Array = [
                         '20220401', '20220402', '20220403', '20220404', '20220405', '20220406', '20220407', '20220408', '20220409', '20220410', '20220411', '20220412', 
                     ];
@@ -153,21 +157,11 @@ class FileController extends Controller
                     )
                 );
             });
-
-
-            
             return redirect()->route('file-export-botswana-index');
-
-
-
             /*
-
-
             SQLSTATE[42S02]: Base table or view not found: 1146 Table 'laravel.file_import_botswanas' doesn't exist 
             (SQL: insert into `file_import_botswanas` (`RecipientAccountHolderName`) 
             values (Shawn 3;Whelan 3;SPW;8202275195083;100003;12345678903;;1;AccountReference 3;1053.59;P0008883;20220403;;;))
-
-
             */
         } elseif($request->file_type == 'BotswanaInstallHeaderRecord'){
             //INSTALLATION HEADER RECORD // 021001        40550021yymmddyymmdd000118000180MAGTAPE
@@ -502,6 +496,12 @@ class FileController extends Controller
 
     // +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+= //
 
+
+
+
+
+    // +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+= //
+
     public function fileExportBotswanaIndex() { // View Data for Export - Botswana //
         $table = FileImportBotswana::latest()->paginate(15);
         return view('FileImport.file-export-botswana-index',compact('table'))
@@ -521,6 +521,19 @@ class FileController extends Controller
         return Excel::download(new BotswanaExport, $downloadDocName);
     }
 
+    // +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+= //
+
+    public function fileExportBotswanaToText(Request $request){
+        // check if file uploaded
+        if (!$request->hasFile('file')) {
+            return view('FileImport.file-import')->withErrors(['msg' => 'Please select a file to upload']);
+        }
+        //dd('qq');
+
+
+
+
+    }
     // +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+= //
 
     public function fileExportBotswanaInstallHeadersIndex() { // View Data for Export - Botswana - InstallHeaders //

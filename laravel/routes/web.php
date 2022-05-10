@@ -49,6 +49,7 @@ Route::post('file-export-botswana-user-trailers', [FileController::class, 'fileE
 
 Route::get('file-export-botswana-index', [FileController::class, 'fileExportBotswanaIndex'])->name('file-export-botswana-index');
 Route::post('file-export-botswana', [FileController::class, 'fileExportBotswana'])->name('file-export-botswana');
+Route::post('file-export-botswana-totext', [FileController::class, 'fileExportBotswanaToText'])->name('file-export-botswana-totext');
 
 
 /*
