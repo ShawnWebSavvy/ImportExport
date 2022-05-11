@@ -28,6 +28,8 @@ use App\Traits\Guid;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
+use Shuchkin\SimpleXLSX;
+
 /*
 021001        40550021yymmddyymmdd000118000180MAGTAPE                                                                                                                              
 044055yymmddyymmddyymmddyymmdd0000010001SAMEDAY                                                                                                                                     
@@ -488,6 +490,7 @@ class FileController extends Controller
         return view('FileImport.file-export-namibia-index',compact('namibia_table'))
             ->with('i', (request()->input('page', 1) - 1) * 5);
     }
+
     public function fileExportNamibia(Request $request) {  // Export - Namibia //
         // unable to pass value in Excel function - but can call sql commands
         $actionDate = $request->actionDate;
@@ -498,14 +501,6 @@ class FileController extends Controller
         $downloadDocName = 'NamibiaExport_'.date("Y_m_d").'.xlsx';
         return Excel::download(new NamibiaExport, $downloadDocName);
     }
-
-    // +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+= //
-
-
-
-
-
-    // +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+= //
 
     public function fileExportBotswanaIndex() { // View Data for Export - Botswana //
         $table = FileImportBotswana::latest()->paginate(15);
@@ -526,21 +521,24 @@ class FileController extends Controller
         return Excel::download(new BotswanaExport, $downloadDocName);
     }
 
-    // +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+= //
-
     public function fileExportBotswanaToText(Request $request){
         // check if file uploaded
         if (!$request->hasFile('file')) {
             return view('FileImport.file-import')->withErrors(['msg' => 'Please select a file to upload']);
         }
 
+        $myfile = fopen("BotswanaExport_".date("Y_m_d").".txt", "a") or die("Unable to open file!");
+        if ( $xlsx = SimpleXLSX::parse($request->file('file')) ) {
+            foreach($xlsx->rows() as $row){
+                fwrite($myfile, implode(',',$row) . PHP_EOL);
+            }
+        } else {
+            echo SimpleXLSX::parseError();
+        }
+        fclose($myfile);
 
-
-        
-
+        return view('FileImport.file-import')->withErrors(['msg' => 'File converted to text']);
     }
-    // +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+= //
-
     public function fileExportBotswanaInstallHeadersIndex() { // View Data for Export - Botswana - InstallHeaders //
         $table = FileImportBotswanaRecordInstallHeader::latest()->paginate(15);
         return view('FileImport.file-export-botswanaInstallHeader-index',compact('table'))
