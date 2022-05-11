@@ -143,27 +143,33 @@ class BotswanaExport implements FromCollection, WithHeadings
             $actionDate = substr($actionDate, 2); 
 
             $recipientSurname_Initials = $export->RecipientAccountHolderSurname.' '.$export->RecipientAccountHolderInitials;
-            $str_length = strlen($recipientSurname_Initials);
+            //$str_length = strlen($recipientSurname_Initials);
             $spaces = '               ';
-            $recipientSurname_Initials = $spaces . $recipientSurname_Initials;
-            $recipientSurname_Initials = substr($recipientSurname_Initials, $str_length, 15);
+            $recipientSurname_Initials = $recipientSurname_Initials . $spaces;
+            $recipientSurname_Initials = substr($recipientSurname_Initials, 0, 15);
 
-            $RecipientNonStandardAccountNumber = $export->RecipientNonStandardAccountNumber;
-            $str_length = strlen($RecipientNonStandardAccountNumber);
-            $zero = '00000000000000000000';
-            $RecipientNonStandardAccountNumber = $zero . $RecipientNonStandardAccountNumber;
-            $RecipientNonStandardAccountNumber = substr($RecipientNonStandardAccountNumber, $str_length, 20);
+            /*
+            // $RecipientNonStandardAccountNumber = $export->RecipientNonStandardAccountNumber;
+            // $str_length = strlen($RecipientNonStandardAccountNumber);
+            // $zero = '00000000000000000000';
+            // $RecipientNonStandardAccountNumber = $zero . $RecipientNonStandardAccountNumber;
+            // $RecipientNonStandardAccountNumber = substr($RecipientNonStandardAccountNumber, $str_length, 20);
+            */
 
+            $RecipientPolicyNumber = $export->PolicyNumber;
+            $str_length = strlen($RecipientPolicyNumber);
+            $spaces = '          ';
+            $RecipientPolicyNumber = $spaces . $RecipientPolicyNumber;
+            $RecipientPolicyNumber = substr($RecipientPolicyNumber, $str_length, 10);
             /*
             $std_transaction_record = [
                 '502506450200076260G971'.$GLOBALS['sequenceNumber'].$export->BranchCode.$export->RecipientAccountNumber.$export->RecipientAccountType.$amount.$export->RecipientAccountType.$actionDate
                 .'210000LEGAL EXPE '.$export->PolicyNumber.' '.$recipientSurname_Initials.'               '.$export->RecipientNonStandardAccountNumber
                 .'               21            '];
                 */
-                $std_transaction_record = [
-                    '502506450200076260G971000001'.$export->BranchCode.$export->RecipientAccountNumber.$export->RecipientAccountType.$amount.$export->RecipientAccountType.$actionDate
-                    .'210000LEGAL EXPE '.$export->PolicyNumber.' '.$recipientSurname_Initials.'               '.$export->RecipientNonStandardAccountNumber
-                    .'               21            '];
+            $std_transaction_record = [
+                '502506450200076260G971000001'.$export->BranchCode.$export->RecipientAccountNumber.$export->RecipientAccountType.$amount.$export->RecipientAccountType.$actionDate
+                .'210000LEGAL EXPE'.$RecipientPolicyNumber.'          '.$recipientSurname_Initials.'               00000000000000000000                21            '];
 
             // this will be blank on 1st run, set the date to the current action date
             if($GLOBALS['setDate'] == ''){
@@ -295,6 +301,7 @@ class BotswanaExport implements FromCollection, WithHeadings
 
 
 
+    
 
 
 
