@@ -23,6 +23,11 @@ use App\Exports\BotswanaRecordInstallHeaderExport;
 use App\Exports\BotswanaRecordContraExport;
 use App\Traits\Guid;
 
+//require 'vendor/autoload.php';
+
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+
 /*
 021001        40550021yymmddyymmdd000118000180MAGTAPE                                                                                                                              
 044055yymmddyymmddyymmddyymmdd0000010001SAMEDAY                                                                                                                                     
@@ -528,10 +533,10 @@ class FileController extends Controller
         if (!$request->hasFile('file')) {
             return view('FileImport.file-import')->withErrors(['msg' => 'Please select a file to upload']);
         }
-        //dd('qq');
 
 
 
+        
 
     }
     // +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+= //
@@ -551,7 +556,6 @@ class FileController extends Controller
         $downloadDocName = 'InstallHeadersExport_'.date("Y-m-d").'.xlsx';
         return Excel::download(new BotswanaRecordInstallHeaderExport, $downloadDocName);
     }
-
     public function fileExportBotswanaUserHeadersIndex() { // View Data for Export - Botswana - UserHeaders //
         $table = FileImportBotswanaRecordUserHeader::latest()->paginate(15);
         return view('FileImport.file-export-botswanaUserHeader-index',compact('table'))
@@ -567,7 +571,6 @@ class FileController extends Controller
         $downloadDocName = 'UserHeadersExport_'.date("Y-m-d").'.xlsx';
         return Excel::download(new BotswanaRecordUserHeaderExport, $downloadDocName);
     }
-
     public function fileExportBotswanaContrasIndex() { // View Data for Export - Botswana - Contra //
         $table = FileImportBotswanaRecordContra::latest()->paginate(15);
         return view('FileImport.file-export-botswanaContras-index',compact('table'))
@@ -583,7 +586,6 @@ class FileController extends Controller
         $downloadDocName = 'ContraExport_'.date("Y-m-d").'.xlsx';
         return Excel::download(new BotswanaRecordContraExport, $downloadDocName);
     }
-
     public function fileExportBotswanaTransactionsIndex() { // View Data for Export - Botswana - Transactions //
         $table = FileImportBotswanaRecordTransaction::latest()->paginate(15);
         return view('FileImport.file-export-botswanaTransactions-index',compact('table'))
@@ -599,7 +601,6 @@ class FileController extends Controller
         $downloadDocName = 'TransactionsExport_'.date("Y-m-d").'.xlsx';
         return Excel::download(new BotswanaRecordTransactionExport, $downloadDocName);
     }
-
     public function fileExportBotswanaInstallTrailersIndex() { // View Data for Export - Botswana - InstallTrailers //
         $table = FileImportBotswanaRecordInstallTrailer::latest()->paginate(15);
         return view('FileImport.file-export-botswanaInstallTrailers-index',compact('table'))
@@ -615,7 +616,6 @@ class FileController extends Controller
         $downloadDocName = 'InstallTrailersExport_'.date("Y-m-d").'.xlsx';
         return Excel::download(new BotswanaRecordInstallTrailerExport, $downloadDocName);
     }
-
     public function fileExportBotswanaUserTrailersIndex() { // View Data for Export - Botswana - UserTrailers //
         $table = FileImportBotswanaRecordUserTrailer::latest()->paginate(15);
         return view('FileImport.file-export-botswanaUserTrailers-index',compact('table'))
