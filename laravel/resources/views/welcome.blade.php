@@ -45,6 +45,18 @@
                     </svg>
                 </div>
 
+                @if(\Session::has('error'))
+                <div class="mt-8 bg-white dark:bg-gray-800 overflow-hidden shadow sm:rounded-lg">
+                    <div class="grid grid-cols-1 md:grid-cols-2">
+                        <div class="mt-2 text-gray-600 dark:text-gray-400 text-sm">
+                            <div class="alert alert-danger">
+                                {{\Session::get('error')}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
                 <div class="mt-8 bg-white dark:bg-gray-800 overflow-hidden shadow sm:rounded-lg">
                     <div class="grid grid-cols-1 md:grid-cols-2">
                         <div class="p-6">

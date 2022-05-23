@@ -2,6 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FileController;
+use App\Http\Controllers\AdminController;
+
+
+use App\Http\Controllers\ProductController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,6 +17,9 @@ use App\Http\Controllers\FileController;
 | contains the "web" middleware group. Now create something great!
 |
 */
+Route::get('/welcome', function () {
+    return view('welcome');
+});
 
 Route::get('/', function () {
     return view('welcome');
@@ -23,11 +30,11 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     //return view('dashboard');
     return view('FileImport.file-import');
-})->middleware(['auth'])->name('dashboard');
+})->middleware(['auth'])->middleware('admin')->name('dashboard');
 
 require __DIR__.'/auth.php';
 
-Route::get('file-import', [FileController::class, 'fileImportIndex'])->name('file-import')->middleware('auth');
+Route::get('file-import', [FileController::class, 'fileImportIndex'])->name('file-import')->middleware('auth')->middleware('admin');
 Route::post('file-upload', [FileController::class, 'fileUpload'])->name('file-upload');
 Route::get('file-export-index', [FileController::class, 'fileExportIndex'])->name('file-export-index');
 
@@ -35,11 +42,11 @@ Route::get('file-export-index', [FileController::class, 'fileExportIndex'])->nam
 Route::get('file-export-index', [FileController::class, 'fileExportIndex'])->name('file-export-index');
 Route::post('file-export', [FileController::class, 'fileExport'])->name('file-export');
 
-Route::get('file-export-namibia-index', [FileController::class, 'fileExportNamibiaIndex'])->name('file-export-namibia-index')->middleware('auth');
+Route::get('file-export-namibia-index', [FileController::class, 'fileExportNamibiaIndex'])->name('file-export-namibia-index')->middleware('auth')->middleware('admin');
 Route::post('file-export-namibia', [FileController::class, 'fileExportNamibia'])->name('file-export-namibia');
 Route::get('file-delete-namibia', [FileController::class, 'FileDeleteNamibia'])->name('file-delete-namibia');
 
-Route::get('file-export-botswana-index', [FileController::class, 'fileExportBotswanaIndex'])->name('file-export-botswana-index')->middleware('auth');
+Route::get('file-export-botswana-index', [FileController::class, 'fileExportBotswanaIndex'])->name('file-export-botswana-index')->middleware('auth')->middleware('admin');
 Route::post('file-export-botswana', [FileController::class, 'fileExportBotswana'])->name('file-export-botswana');
 Route::post('file-export-botswana-totext', [FileController::class, 'fileExportBotswanaToText'])->name('file-export-botswana-totext');
 
