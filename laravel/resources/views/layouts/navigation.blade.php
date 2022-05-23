@@ -12,12 +12,20 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                    <!--
+                    <x-nav-link :href="route('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    -->
                     <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                    <x-nav-link :href="route('file-import')" :active="request()->routeIs('Home')">
-                        {{ __('Home') }}
+                    <x-nav-link :href="route('file-import')">
+                        {{ __('File Import') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('file-export-namibia-index')">
+                        {{ __('Namibia Records') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('file-export-botswana-index')">
+                        {{ __('Botswana Records') }}
                     </x-nav-link>
                 </div>
                 </div>

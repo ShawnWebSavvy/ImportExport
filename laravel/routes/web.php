@@ -15,30 +15,35 @@ use App\Http\Controllers\FileController;
 */
 
 Route::get('/', function () {
-    //return view('welcome');
-    return view('FileImport.file-import');
+    return view('welcome');
+    //return view('dashboard');
+    //return view('FileImport.file-import');
 });
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    //return view('dashboard');
+    return view('FileImport.file-import');
 })->middleware(['auth'])->name('dashboard');
 
 require __DIR__.'/auth.php';
 
-Route::get('file-import', [FileController::class, 'fileImportIndex'])->name('file-import');
+Route::get('file-import', [FileController::class, 'fileImportIndex'])->name('file-import')->middleware('auth');
 Route::post('file-upload', [FileController::class, 'fileUpload'])->name('file-upload');
 Route::get('file-export-index', [FileController::class, 'fileExportIndex'])->name('file-export-index');
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth'])->name('dashboard');
+
 
 Route::get('file-export-index', [FileController::class, 'fileExportIndex'])->name('file-export-index');
 Route::post('file-export', [FileController::class, 'fileExport'])->name('file-export');
 
-Route::get('file-export-namibia-index', [FileController::class, 'fileExportNamibiaIndex'])->name('file-export-namibia-index');
+Route::get('file-export-namibia-index', [FileController::class, 'fileExportNamibiaIndex'])->name('file-export-namibia-index')->middleware('auth');
 Route::post('file-export-namibia', [FileController::class, 'fileExportNamibia'])->name('file-export-namibia');
 Route::get('file-delete-namibia', [FileController::class, 'FileDeleteNamibia'])->name('file-delete-namibia');
 
+Route::get('file-export-botswana-index', [FileController::class, 'fileExportBotswanaIndex'])->name('file-export-botswana-index')->middleware('auth');
+Route::post('file-export-botswana', [FileController::class, 'fileExportBotswana'])->name('file-export-botswana');
+Route::post('file-export-botswana-totext', [FileController::class, 'fileExportBotswanaToText'])->name('file-export-botswana-totext');
+
+// not used, but get so many error if deleted //  vvv // 
 Route::get('file-export-botswana-install-headers-index', [FileController::class, 'fileExportBotswanaInstallHeadersIndex'])->name('file-export-botswana-install-headers-index');
 Route::post('file-export-botswana-install-headers', [FileController::class, 'fileExportBotswanaInstallHeaders'])->name('file-export-botswana-install-headers');
 
@@ -56,11 +61,7 @@ Route::post('file-export-botswana-install-trailers', [FileController::class, 'fi
 
 Route::get('file-export-botswana-user-trailers-index', [FileController::class, 'fileExportBotswanaUserTrailersIndex'])->name('file-export-botswana-user-trailers-index');
 Route::post('file-export-botswana-user-trailers', [FileController::class, 'fileExportBotswanaUserTrailers'])->name('file-export-botswana-user-trailers');
-
-Route::get('file-export-botswana-index', [FileController::class, 'fileExportBotswanaIndex'])->name('file-export-botswana-index');
-Route::post('file-export-botswana', [FileController::class, 'fileExportBotswana'])->name('file-export-botswana');
-Route::post('file-export-botswana-totext', [FileController::class, 'fileExportBotswanaToText'])->name('file-export-botswana-totext');
-
+// not used, but get so many error if deleted // ^^^ //
 
 /*
 Route::get('/file-import-export', function () {

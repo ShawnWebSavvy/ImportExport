@@ -539,6 +539,7 @@ class FileController extends Controller
 
         return view('FileImport.file-import')->withErrors(['msg' => 'File converted to text']);
     }
+/*
     public function fileExportBotswanaInstallHeadersIndex() { // View Data for Export - Botswana - InstallHeaders //
         $table = FileImportBotswanaRecordInstallHeader::latest()->paginate(15);
         return view('FileImport.file-export-botswanaInstallHeader-index',compact('table'))
@@ -629,6 +630,7 @@ class FileController extends Controller
         $downloadDocName = 'UserTrailersExport_'.date("Y-m-d").'.xlsx';
         return Excel::download(new BotswanaRecordUserTrailerExport, $downloadDocName);
     }
+*/
 }
 
 
