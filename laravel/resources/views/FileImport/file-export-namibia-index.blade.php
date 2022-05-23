@@ -1,9 +1,9 @@
-Namibia
 @extends('layouts.header')
 
 @section('content')
 <form action="{{ route('file-export-namibia') }}" method="POST" enctype="multipart/form-data">
         @csrf
+        <h4>Namibia Records</h4>
         <!--
         <label for="accountNumber">Account Number</label>
         <input type="number" id="accountNumber" name="accountNumber">

@@ -1,5 +1,5 @@
+@extends('layouts.navigation')
 @extends('layouts.header')
-
 @section('content')
 <div class="container mt-5 text-center">
         <h4>View Imported Data</h4>

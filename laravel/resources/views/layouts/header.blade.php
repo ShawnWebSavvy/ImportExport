@@ -27,6 +27,37 @@ li {
   <li><a href="{{ route('file-import') }}">Home</a></li> | 
   <li><a href="{{ route('file-export-namibia-index') }}">Namibia</a></li> | 
   <li><a href="{{ route('file-export-botswana-index') }}">Botswana</a></li> | 
+  @if (Route::has('login'))
+    @auth
+        <li><a href="{{ url('/dashboard') }}" class="text-sm text-gray-700 dark:text-gray-500 underline">Dashboard</a></li> | 
+      @else
+        <li><a href="{{ route('login') }}" class="text-sm text-gray-700 dark:text-gray-500 underline">Log in</a></li> | 
+
+        @if (Route::has('register'))
+          <li><a href="{{ route('register') }}" >Register</a></li> | 
+        @endif
+
+    @endauth
+
+  @endif
+  <li><a href="{{ route('logout') }}" >qq</a></li> | 
+
+  <li>
+  <x-dropdown-link :href="route('logout')"
+                                    onclick="event.preventDefault();
+                                                this.closest('form').submit();">
+                                {{ __('Log Out') }}
+                            </x-dropdown-link>
+                            </li> | 
+
+  <li>
+  <x-dropdown-link :href="route('logout')"
+                                    onclick="event.preventDefault();
+                                                this.closest('form').submit();">
+                                {{ __('Log Outt') }}
+                            </x-dropdown-link>
+                            </li> | 
+
   <!--
   <li><a href="{{ route('file-export-botswana-install-headers-index') }}">Install Header</a></li> | 
   <li><a href="{{ route('file-export-botswana-user-headers-index') }}">User Header</a></li> | 

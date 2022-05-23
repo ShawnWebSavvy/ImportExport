@@ -1,9 +1,9 @@
-Botswana v2
 @extends('layouts.header')
 
 @section('content')
 <form action="{{ route('file-export-botswana') }}" method="POST" enctype="multipart/form-data">
         @csrf
+        <h4>Botswana Records</h4>
         <!--
         <label for="accountNumber">Account Number</label>
         <input type="number" id="accountNumber" name="accountNumber">

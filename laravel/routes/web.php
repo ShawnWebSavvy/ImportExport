@@ -15,12 +15,22 @@ use App\Http\Controllers\FileController;
 */
 
 Route::get('/', function () {
+    //return view('welcome');
     return view('FileImport.file-import');
 });
+
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth'])->name('dashboard');
+
+require __DIR__.'/auth.php';
 
 Route::get('file-import', [FileController::class, 'fileImportIndex'])->name('file-import');
 Route::post('file-upload', [FileController::class, 'fileUpload'])->name('file-upload');
 Route::get('file-export-index', [FileController::class, 'fileExportIndex'])->name('file-export-index');
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth'])->name('dashboard');
 
 Route::get('file-export-index', [FileController::class, 'fileExportIndex'])->name('file-export-index');
 Route::post('file-export', [FileController::class, 'fileExport'])->name('file-export');
