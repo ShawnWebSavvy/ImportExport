@@ -17,7 +17,6 @@ use App\Http\Controllers\ProductController;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
 Route::get('/welcome', function () {
     return view('FileImport.file-import');
 })->middleware(['auth'])->middleware('admin')->name('dashboard');
