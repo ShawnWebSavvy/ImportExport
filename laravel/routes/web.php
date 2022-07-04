@@ -32,7 +32,6 @@ Route::get('/dashboard', function () {
     return view('FileImport.file-import');
 })->middleware(['auth'])->middleware('admin')->name('dashboard');
 
-
 require __DIR__.'/auth.php';
 
 Route::get('file-import', [FileController::class, 'fileImportIndex'])->name('file-import')->middleware('auth')->middleware('admin');
