@@ -18,12 +18,14 @@ use App\Http\Controllers\ProductController;
 |
 */
 Route::get('/welcome', function () {
-    return view('FileImport.file-import');
-})->middleware(['auth'])->middleware('admin')->name('dashboard');
+    return view('welcome');
+});
 
 Route::get('/', function () {
-    return view('FileImport.file-import');
-})->middleware(['auth'])->middleware('admin')->name('dashboard');
+    return view('welcome');
+    //return view('dashboard');
+    //return view('FileImport.file-import');
+});
 
 Route::get('/dashboard', function () {
     //return view('dashboard');
