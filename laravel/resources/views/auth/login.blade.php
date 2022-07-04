@@ -50,12 +50,16 @@
                 <x-button class="ml-3">
                     {{ __('Log in') }}
                 </x-button>
-                <x-button class="ml-3">
-                @if (Route::has('register'))
-                    <a href="{{ route('register') }}" >Register</a>
-                @endif
-                </x-button>
+                <!-- Register button removed here -->
             </div>
         </form>
     </x-auth-card>
 </x-guest-layout>
+
+<!--
+<x-button class="ml-3">
+    @if (Route::has('register'))
+        <a href="{{ route('register') }}" >Register</a>
+    @endif
+</x-button>
+-->
