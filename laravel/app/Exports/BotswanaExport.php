@@ -24,9 +24,18 @@ class BotswanaExport implements FromCollection, WithHeadings
             $actionDateTo = $field->dateField_2;
         }
 
-        $query =  DB::table('generation_numbers')->orderBy('id', 'desc')->first();
-        // incremnt the generation number
-        $generation_number = $query->generation_number + 1;
+        $query =  DB::table('generation_numbers')->orderBy('id', 'desc')
+        ->where('bank', 'Botswana')
+        ->first();
+        
+        // if database is empty (was unable to set a default value in migration)
+        if(!$query){
+            $generation_number = 0001;
+        } else {
+            // incremnt the generation number
+            $generation_number = $query->generation_number_botswana + 1;
+        }
+
         // if = 10000, then reset, as it can only be 4 digits
         if($generation_number == 10000){
             $generation_number = 1;
@@ -39,9 +48,19 @@ class BotswanaExport implements FromCollection, WithHeadings
         
         // make global to insert call from trailer (footer) function
         $GLOBALS['generation_number'] = $generation_number;
+
+        //delete rows that are not required
+        DB::table('generation_numbers')
+        ->where('bank', 'Botswana',)
+        ->delete();
+
         // insert generation number, to keep refernce
         DB::table('generation_numbers')->insert(
-            ['generation_number' => $generation_number]
+            [
+                'generation_number_botswana' => $generation_number,
+                'bank' => 'Botswana',
+            ]
+
         );
     
         // format both dates to correct format

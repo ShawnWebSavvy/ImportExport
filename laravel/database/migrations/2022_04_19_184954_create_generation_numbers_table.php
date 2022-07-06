@@ -15,7 +15,9 @@ class CreateGenerationNumbersTable extends Migration
     {
         Schema::create('generation_numbers', function (Blueprint $table) {
             $table->increments('id')->length(10)->unsigned();
-            $table->string('generation_number', 4)->nullable();
+            $table->string('generation_number_botswana', 4,)->default('0000');
+            $table->string('generation_number_capitec', 4)->default('0000');
+            $table->string('bank', 15)->nullable();
             $table->timestamps();
         });
     }

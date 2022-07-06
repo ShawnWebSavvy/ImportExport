@@ -9,5 +9,9 @@ class generation_number extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['generation_number'];
+    protected $fillable = [
+        'generation_number_botswana',
+        'generation_number_capitec',
+        'bank'
+    ];
 }
