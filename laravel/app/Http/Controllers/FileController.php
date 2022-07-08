@@ -83,8 +83,8 @@ class FileController extends Controller
         }
 
         $pathToFile = $request->file('file');
-        
-        if($request->file_type == 'Namibia'){
+
+        if($request->file_type == 'Namibia'){ /* **** Namibia **** */
             /*
             $dateNow = date('Y-m-d');
             $guid1 = $this->get_guid();
@@ -97,7 +97,7 @@ class FileController extends Controller
             ->noHeaderRow()
             ->skip(1)
             ->getRows();
-            dd('qq');
+            
             $rows->each(function(array $rowProperties) {
                 $count = ++$this->rows;
                 if($count < 4){
@@ -134,7 +134,8 @@ class FileController extends Controller
                 }
             });
             return redirect()->route('file-export-namibia-index');
-        } elseif($request->file_type == 'Botswana'){
+
+        } elseif($request->file_type == 'Botswana'){ /* **** Botswana **** */
             $dateNow = date('Y-m-d');
             $guid1 = $this->get_guid();
             $guid2 = $this->get_guid();
@@ -165,11 +166,11 @@ class FileController extends Controller
                 );
             });
             return redirect()->route('file-export-botswana-index');
-            /*
-            SQLSTATE[42S02]: Base table or view not found: 1146 Table 'laravel.file_import_botswanas' doesn't exist 
-            (SQL: insert into `file_import_botswanas` (`RecipientAccountHolderName`) 
-            values (Shawn 3;Whelan 3;SPW;8202275195083;100003;12345678903;;1;AccountReference 3;1053.59;P0008883;20220403;;;))
-            */
+        
+        } elseif($request->file_type == 'Capitec'){ /* **** Capitec **** */
+            
+
+
         } elseif($request->file_type == 'BotswanaInstallHeaderRecord'){
             //INSTALLATION HEADER RECORD // 021001        40550021yymmddyymmdd000118000180MAGTAPE
             $rows = SimpleExcelReader::create($pathToFile, 'csv')

@@ -41,11 +41,17 @@
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <label for="banks">Upload Type</label><br>
-                                                <input type="radio" id="Namibia" name="file_type" value="Namibia" checked='checked'>
+
+                                                <input type="radio" id="Capitec" name="file_type" value="Capitec" checked='checked'>
+                                                <label for="Capitec">Capitec</label><br>
+
+                                                <input type="radio" id="Botswana" name="file_type" value="Botswana">
+                                                <label for="Botswana">Botswana</label><br>
+
+                                                <input type="radio" id="Namibia" name="file_type" value="Namibia">
                                                 <label for="Namibia">Namibia</label><br>
 
-                                                <input type="radio" id="Botswana" name="file_type" value="Botswana" checked='checked'>
-                                                <label for="Botswana">Botswana</label><br>
+                                                
                                                 <!--
                                                 <input type="radio" id="BotswanaInstallHeaderRecord" name="file_type" value="BotswanaInstallHeaderRecord">
                                                 <label for="BotswanaInstallHeaderRecord">BotswanaInstallHeaderRecord</label><br>
@@ -61,7 +67,6 @@
                                                 <label for="BotswanaInstallTrailers">BotswanaInstallTrailers</label><br>
                                                 -->
                                             </div>
-
 
                                             <div class="col-md-6">
                                                 <div class="form-group mb-4" style="max-width: 500px; margin: 0 auto;">
