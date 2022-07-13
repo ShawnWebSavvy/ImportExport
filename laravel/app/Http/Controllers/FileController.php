@@ -13,6 +13,12 @@ use App\Models\FileImportBotswanaRecordTransaction;
 use App\Models\FileImportBotswanaRecordInstallTrailer;
 use App\Models\FileImportBotswanaRecordInstallHeader;
 use App\Models\FileImportBotswanaRecordContra;
+use App\Models\MercantileUser;
+use App\Models\MercantileTransaction;
+use App\Models\MercantileUserBank;
+use App\Models\MercantileUserPolicy;
+use App\Models\MercantileTransactionRejections;
+use App\Models\MercantileNominatedBank;
 use App\Exports\NamibiaExport;
 use App\Exports\BotswanaExport;
 use App\Exports\BotswanaRecordUserTrailerExport;
@@ -168,8 +174,107 @@ class FileController extends Controller
             return redirect()->route('file-export-botswana-index');
         
         } elseif($request->file_type == 'Capitec'){ /* **** Capitec **** */
-            
 
+            $rows = SimpleExcelReader::create($pathToFile, 'xlsx')
+            ->noHeaderRow()
+            ->skip(1)
+            ->getRows();
+
+            $rows->each(function(array $rowProperties) {
+                $RecordIdentifier = substr($rowProperties[0], 0, 2);
+
+                $AccountHolderFullName = substr($rowProperties[0], 124, 30);
+                $explode = explode(" ", $AccountHolderFullName);
+                $AccountHolderSurame = $explode[0];
+                $AccountHolderInitials = trim($explode[1]);
+
+                $DestinationAccountNumber = substr($rowProperties[0], 58, 16); /* User */
+                $DestinationBranchCode = substr($rowProperties[0], 52, 6); /* User */
+                $PaymentReference = substr($rowProperties[0], 18, 34);
+                $Amount = substr($rowProperties[0], 74, 12);
+                $ActionDate = substr($rowProperties[0], 86, 8);
+                $TransactionUniqueID = substr($rowProperties[0], 94, 30);
+                $StatementReference = substr($rowProperties[0], 94, 10);
+                $PolicyNumber = $ContractReference = substr($rowProperties[0], 104, 14);
+                $CycleDate = substr($rowProperties[0], 118, 6);
+                
+                $TransactionType = substr($rowProperties[0], 154, 4);
+                $ClientType = substr($rowProperties[0], 158, 2);
+                $ChargesAccountNumber = substr($rowProperties[0], 160, 16); /* Leza */
+                $ServiceType = substr($rowProperties[0], 176, 2);
+                $OriginalPaymentReference = substr($rowProperties[0], 178, 34);
+                $EntryClass = substr($rowProperties[0], 212, 2);
+                $NominatedAccountReference = substr($rowProperties[0], 214, 30);
+                $NominatedAccountNumber = substr($rowProperties[0], 2, 16);
+                $BDF_Indicator = substr($rowProperties[0], 244, 1);
+                
+                // capitec branch code 470010
+                $BankType = 'Capitec';
+                if($DestinationBranchCode != '470010'){$BankType = 'Nedbank';}
+                
+                if($RecordIdentifier == '02'){
+                    // need to check if Policy Number exists
+                    // update records if yes, insert if no
+                    $policy = DB::table('mercantile_user_policies')->where('PolicyNumber',$PolicyNumber)->first();
+                    if($policy){
+                        /* policy number exists, update banking details */
+                        DB::table('mercantile_user_banks')
+                        ->where('policy_id', $PolicyNumber)
+                        ->update([
+                            'UserAccountNumber' => $DestinationAccountNumber,
+                            'UserBranchCode' => $DestinationBranchCode,
+                            'UserBankType' => $BankType,
+                        ]);
+                    } else { /* policy does not exist -> insert all fields */
+                        DB::table('mercantile_user_policies')->insert(
+                            array(
+                                'PolicyNumber' => $PolicyNumber,
+                            )
+                        );
+    
+                        DB::table('mercantile_users')->insert(
+                            array(
+                                'AccountHolderFullName' => $AccountHolderFullName,
+                                'AccountHolderSurame' => $AccountHolderSurame,
+                                'AccountHolderInitials' => $AccountHolderInitials,
+                                'ClientType' => $ClientType,
+                                'policy_id' => $PolicyNumber,
+                            )
+                        );
+    
+                        DB::table('mercantile_user_banks')->insert(
+                            array(
+                                'UserAccountNumber' => $DestinationAccountNumber,
+                                'UserBranchCode' => $DestinationBranchCode,
+                                'UserBankType' => $BankType,
+                                'policy_id' => $PolicyNumber,
+                            )
+                        );
+                    }
+                    
+                    // transaction will always insert
+                    DB::table('mercantile_transactions')->insert(
+                        array(
+                            'RecordIdentifier' => $RecordIdentifier,
+                            'PaymentReference' => $PaymentReference,
+                            'Amount' => $Amount,
+                            'ActionDate' => $ActionDate,
+                            'TransactionUniqueID' => $TransactionUniqueID,
+                            'StatementReference' => $StatementReference,
+                            'CycleDate' => $CycleDate,
+                            'TransactionType' => $TransactionType,
+                            'ServiceType' => $ServiceType,
+                            'OriginalPaymentReference' => $OriginalPaymentReference,
+                            'EntryClass' => $EntryClass,
+                            'NominatedAccountReference' => $NominatedAccountReference,
+                            'BDF_Indicator' => $BDF_Indicator,
+                            'policy_id' => $PolicyNumber,
+                            'Processed' => '0',
+                        )
+                    );
+                }
+            });
+            // return page view here
 
         } elseif($request->file_type == 'BotswanaInstallHeaderRecord'){
             //INSTALLATION HEADER RECORD // 021001        40550021yymmddyymmdd000118000180MAGTAPE
