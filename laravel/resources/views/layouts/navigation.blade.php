@@ -27,6 +27,9 @@
                     <x-nav-link :href="route('file-export-botswana-index')">
                         {{ __('Botswana Records') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('file-export-mercantile-index')">
+                        {{ __('Mercantile Records') }}
+                    </x-nav-link>
                 </div>
                 </div>
             </div>

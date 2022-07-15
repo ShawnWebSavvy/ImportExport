@@ -275,6 +275,7 @@ class FileController extends Controller
                 }
             });
             // return page view here
+            return redirect()->route('file-export-mercantile-index');
 
         } elseif($request->file_type == 'BotswanaInstallHeaderRecord'){
             //INSTALLATION HEADER RECORD // 021001        40550021yymmddyymmdd000118000180MAGTAPE

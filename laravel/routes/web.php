@@ -2,9 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FileController;
+use App\Http\Controllers\MercantileController;
 use App\Http\Controllers\AdminController;
-
-
 use App\Http\Controllers\ProductController;
 
 /*
@@ -36,7 +35,6 @@ Route::get('file-import', [FileController::class, 'fileImportIndex'])->name('fil
 Route::post('file-upload', [FileController::class, 'fileUpload'])->name('file-upload');
 Route::get('file-export-index', [FileController::class, 'fileExportIndex'])->name('file-export-index');
 
-
 Route::get('file-export-index', [FileController::class, 'fileExportIndex'])->name('file-export-index');
 Route::post('file-export', [FileController::class, 'fileExport'])->name('file-export');
 
@@ -47,6 +45,10 @@ Route::get('file-delete-namibia', [FileController::class, 'FileDeleteNamibia'])-
 Route::get('file-export-botswana-index', [FileController::class, 'fileExportBotswanaIndex'])->name('file-export-botswana-index')->middleware('auth')->middleware('admin');
 Route::post('file-export-botswana', [FileController::class, 'fileExportBotswana'])->name('file-export-botswana');
 Route::post('file-export-botswana-totext', [FileController::class, 'fileExportBotswanaToText'])->name('file-export-botswana-totext');
+
+Route::get('file-export-mercantile-index', [MercantileController::class, 'fileExportMercantileIndex'])->name('file-export-mercantile-index')->middleware('auth')->middleware('admin');
+Route::post('file-export-mercantile-nedbank', [MercantileController::class, 'fileExportMercantileNedbank'])->name('file-export-mercantile-nedbank');
+Route::post('file-export-mercantile-capitec', [MercantileController::class, 'fileExportMercantileCapitec'])->name('file-export-mercantile-capitec');
 
 // not used, but get so many error if deleted //  vvv // 
 Route::get('file-export-botswana-install-headers-index', [FileController::class, 'fileExportBotswanaInstallHeadersIndex'])->name('file-export-botswana-install-headers-index');

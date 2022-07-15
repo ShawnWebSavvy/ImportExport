@@ -14,6 +14,9 @@ use Spatie\SimpleExcel\SimpleExcelReader;
 use Spatie\SimpleExcel\SimpleExcelWriter;
 use Illuminate\Support\Facades\DB;
 
+use App\Models\FileImportNamibia;
+//use App\Exports\NamibiaExport;
+
 class MercantileController extends Controller
 {
     /**
@@ -21,8 +24,80 @@ class MercantileController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function mercantileIndex(){
+    public function fileExportMercantileIndex(){
+        /*
+        $namibia_table = FileImportNamibia::latest()->paginate(15);
+        return view('FileImport.file-export-namibia-index',compact('namibia_table'))
+            ->with('i', (request()->input('page', 1) - 1) * 5);
+        */
+
+        /*
+        <th>Policy</th>                     -->     mercantie_(all)
+        <th>Action Date</th>                -->     mercantile_transaction
+        <th>User Full Name</th>             -->     mercantile_users
+
+        NB - Bank - Nedbank - Capitec       -->     mercantile_banks
+        */
+
+        /*
+        $nedbankQuery = DB::table('mercantile_user_policies')
+        ->join('mercantile_transactions', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_transactions.policy_id')
+        ->join('mercantile_users', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_users.policy_id')
+        ->join('mercantile_user_banks', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_user_banks.policy_id')
+        ->where('mercantile_user_banks.UserBankType', '=', 'Nedbank')
+        ->where('mercantile_transactions.Processed', '=', '0')
+        ->paginate(15);
+
+        $capitecQuery = DB::table('mercantile_user_policies')
+        ->join('mercantile_transactions', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_transactions.policy_id')
+        ->join('mercantile_users', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_users.policy_id')
+        ->join('mercantile_user_banks', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_user_banks.policy_id')
+        ->where('mercantile_user_banks.UserBankType', '=', 'Capitec')
+        ->where('mercantile_transactions.Processed', '=', '0')
+        ->paginate(15);
+        */
+
+        /*
+        return view('Mercantile.file-export-mercantile-index',
+        compact('nedbankQuery'))
+            ->with('i', (request()->input('page', 1) - 1) * 5);
+        */
         
+        return view('Mercantile.file-export-mercantile-index', [
+            'nedbankQuery' => DB::table('mercantile_user_policies')
+            ->join('mercantile_transactions', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_transactions.policy_id')
+            ->join('mercantile_users', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_users.policy_id')
+            ->join('mercantile_user_banks', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_user_banks.policy_id')
+            ->where('mercantile_user_banks.UserBankType', '=', 'Nedbank')
+            ->where('mercantile_transactions.Processed', '=', '0')
+            ->paginate(30),
+
+            'capitecQuery' => DB::table('mercantile_user_policies')
+            ->join('mercantile_transactions', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_transactions.policy_id')
+            ->join('mercantile_users', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_users.policy_id')
+            ->join('mercantile_user_banks', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_user_banks.policy_id')
+            ->where('mercantile_user_banks.UserBankType', '=', 'Capitec')
+            ->where('mercantile_transactions.Processed', '=', '0')
+            ->paginate(30)
+        ]);
+
+        
+        //return view('Mercantile.file-export-mercantile-index');
+
+        /*
+        $namibia_table = FileImportNamibia::latest()->paginate(15);
+        return view('Mercantile.file-export-mercantile-index',compact('namibia_table'))
+            ->with('i', (request()->input('page', 1) - 1) * 5);
+        */
+    }
+
+    public function fileExportMercantileNedbank()
+    {
+        dd('Nedbank');
+    }
+    public function fileExportMercantileCapitec()
+    {
+        dd('Capitec');
     }
 
     public function index()
