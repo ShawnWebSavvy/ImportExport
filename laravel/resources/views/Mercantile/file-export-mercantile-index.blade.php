@@ -38,7 +38,7 @@
                         </div>
                     
                         <div class="col-sm-6">
-                                <form action="{{ route('file-export-mercantile-nedbank') }}" method="POST" enctype="multipart/form-data">
+                                <form action="{{ route('file-export-mercantile-capitec') }}" method="POST" enctype="multipart/form-data">
                                         @csrf
                                         <h5>Capitec Records</h5>
                                         </br>

@@ -13,7 +13,8 @@ use Maatwebsite\Excel\Facades\Excel;
 use Spatie\SimpleExcel\SimpleExcelReader;
 use Spatie\SimpleExcel\SimpleExcelWriter;
 use Illuminate\Support\Facades\DB;
-use App\Exports\MercantileExport;
+use App\Exports\MercantileCapitecExport;
+use App\Exports\MercantileNedbankExport;
 
 class MercantileController extends Controller
 {
@@ -89,13 +90,22 @@ class MercantileController extends Controller
         */
     }
 
-    public function fileExportMercantileNedbank()
+    public function fileExportMercantileNedbank(Request $request)
     {
         dd('Nedbank');
     }
-    public function fileExportMercantileCapitec()
+    public function fileExportMercantileCapitec(Request $request)
     {
-        dd('Capitec');
+
+        $actionDateFrom = $request->actionDateFrom;
+        $actionDateTo = $request->actionDateTo;
+
+        DB::table('export_fields')->delete();
+        $values = array('dateField_1' => $actionDateFrom,'dateField_2' => $actionDateTo);
+        DB::table('export_fields')->insert($values);
+        
+        $downloadDocName = 'CapitecExport_'.date("Y_m_d").'.xlsx';
+        return Excel::download(new MercantileCapitecExport, $downloadDocName);
     }
 
     public function index()
