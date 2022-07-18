@@ -9,15 +9,12 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
                     <h4>Mercantile Records</h4>
-
                     <div class="row">
                         <div class="col-sm-6">
                             <form action="{{ route('file-export-mercantile-nedbank') }}" method="POST" enctype="multipart/form-data">
                                     @csrf
                                     <h5>Nedbank Records</h5>
                                     </br>
-                                    <label for="actionDate">Action Date:</label>
-                                    <input type="date" id="actionDate" name="actionDate">
                                     <button class="btn btn-success">Download</button>
                             </form>
                             </br></br>
@@ -45,8 +42,10 @@
                                         @csrf
                                         <h5>Capitec Records</h5>
                                         </br>
-                                        <label for="actionDate">Action Date:</label>
-                                        <input type="date" id="actionDate" name="actionDate">
+                                        <label for="actionDate">Action Date</label>
+                                        <input type="date" id="actionDateFrom" name="actionDateFrom">
+                                        <label for="actionDate">:</label>
+                                        <input type="date" id="actionDateTo" name="actionDateTo">
                                         <button class="btn btn-success">Download</button>
                                 </form>
                                 </br></br>

@@ -13,9 +13,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Spatie\SimpleExcel\SimpleExcelReader;
 use Spatie\SimpleExcel\SimpleExcelWriter;
 use Illuminate\Support\Facades\DB;
-
-use App\Models\FileImportNamibia;
-//use App\Exports\NamibiaExport;
+use App\Exports\MercantileExport;
 
 class MercantileController extends Controller
 {
