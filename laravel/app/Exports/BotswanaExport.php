@@ -60,7 +60,6 @@ class BotswanaExport implements FromCollection, WithHeadings
                 'generation_number_botswana' => $generation_number,
                 'bank' => 'Botswana',
             ]
-
         );
     
         // format both dates to correct format
@@ -198,7 +197,9 @@ class BotswanaExport implements FromCollection, WithHeadings
 
             // if the current row action date is not the set date (above), then run a contra, and set the action date to the $GLOBALS['setDate']
             if($GLOBALS['setDate'] != $export->ActionDate){
-                // search for current date set in array $GLOBALS['actionDateTotal'], get the key of the value found, use the key, use key to return the amounts value, this amount value is the sum of all the amounts for the action date
+                // search for current date set in array $GLOBALS['actionDateTotal'], 
+                // get the key of the value found, use the key, 
+                // use key to return the amounts value, this amount value is the sum of all the amounts for the action date
                 $key = array_search($GLOBALS['setDate'], array_column($GLOBALS['actionDateTotal'], 'Date'));
                 $amount = $GLOBALS['actionDateTotal'][$key]['Amount'];
                 

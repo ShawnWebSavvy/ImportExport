@@ -47,6 +47,14 @@
                                         <label for="actionDate">:</label>
                                         <input type="date" id="actionDateTo" name="actionDateTo">
                                         <button class="btn btn-success">Download</button>
+
+                                        <div class="col-sm-12">
+                                        @if($errors->any())
+                                            <br/>
+                                            <h5>{{$errors->first()}}</h5>
+                                        @endif
+                                        </div>
+                                        
                                 </form>
                                 </br></br>
                                 <table class="table table-bordered">

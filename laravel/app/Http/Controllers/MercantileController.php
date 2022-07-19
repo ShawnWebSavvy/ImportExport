@@ -68,7 +68,7 @@ class MercantileController extends Controller
             ->join('mercantile_users', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_users.policy_id')
             ->join('mercantile_user_banks', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_user_banks.policy_id')
             ->where('mercantile_user_banks.UserBankType', '=', 'Nedbank')
-            ->where('mercantile_transactions.Processed', '=', '0')
+            //->where('mercantile_transactions.Processed', '=', '0')
             ->paginate(30),
 
             'capitecQuery' => DB::table('mercantile_user_policies')
@@ -76,7 +76,7 @@ class MercantileController extends Controller
             ->join('mercantile_users', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_users.policy_id')
             ->join('mercantile_user_banks', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_user_banks.policy_id')
             ->where('mercantile_user_banks.UserBankType', '=', 'Capitec')
-            ->where('mercantile_transactions.Processed', '=', '0')
+            //->where('mercantile_transactions.Processed', '=', '0')
             ->paginate(30)
         ]);
 
@@ -96,10 +96,30 @@ class MercantileController extends Controller
     }
     public function fileExportMercantileCapitec(Request $request)
     {
-
         $actionDateFrom = $request->actionDateFrom;
         $actionDateTo = $request->actionDateTo;
 
+        if (!$actionDateFrom || !$actionDateTo) {
+
+            return view('Mercantile.file-export-mercantile-index', [
+                'nedbankQuery' => DB::table('mercantile_user_policies')
+                ->join('mercantile_transactions', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_transactions.policy_id')
+                ->join('mercantile_users', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_users.policy_id')
+                ->join('mercantile_user_banks', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_user_banks.policy_id')
+                ->where('mercantile_user_banks.UserBankType', '=', 'Nedbank')
+                ->where('mercantile_transactions.Processed', '=', '0')
+                ->paginate(30),
+    
+                'capitecQuery' => DB::table('mercantile_user_policies')
+                ->join('mercantile_transactions', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_transactions.policy_id')
+                ->join('mercantile_users', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_users.policy_id')
+                ->join('mercantile_user_banks', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_user_banks.policy_id')
+                ->where('mercantile_user_banks.UserBankType', '=', 'Capitec')
+                ->where('mercantile_transactions.Processed', '=', '0')
+                ->paginate(30)
+            ])->withErrors(['msg' => 'Please select both Action Dates, from and to']);
+        }
+        
         DB::table('export_fields')->delete();
         $values = array('dateField_1' => $actionDateFrom,'dateField_2' => $actionDateTo);
         DB::table('export_fields')->insert($values);

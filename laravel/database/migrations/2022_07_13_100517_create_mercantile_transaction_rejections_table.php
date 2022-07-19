@@ -19,8 +19,8 @@ class CreateMercantileTransactionRejectionsTable extends Migration
             $table->string('policy_id', 20);
             $table->foreign('policy_id')->references('PolicyNumber')->on('mercantile_user_policies')->onDelete('cascade');
 
-            $table->integer('transaction_id')->length(10)->unsigned()->index()->nullable(false);
-            $table->foreign('transaction_id')->references('id')->on('mercantile_transactions')->onDelete('cascade');
+            //$table->integer('transaction_id')->length(10)->unsigned()->index()->nullable(false);
+            //$table->foreign('transaction_id')->references('id')->on('mercantile_transactions')->onDelete('cascade');
 
             $table->boolean('Processed', 1)->nullable();
 
