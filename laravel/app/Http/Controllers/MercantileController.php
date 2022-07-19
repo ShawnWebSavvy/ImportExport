@@ -15,6 +15,7 @@ use Spatie\SimpleExcel\SimpleExcelWriter;
 use Illuminate\Support\Facades\DB;
 use App\Exports\MercantileCapitecExport;
 use App\Exports\MercantileNedbankExport;
+use Shuchkin\SimpleXLSX;
 
 class MercantileController extends Controller
 {
@@ -69,7 +70,7 @@ class MercantileController extends Controller
             ->join('mercantile_user_banks', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_user_banks.policy_id')
             ->where('mercantile_user_banks.UserBankType', '=', 'Nedbank')
             //->where('mercantile_transactions.Processed', '=', '0')
-            ->paginate(30),
+            ->paginate(20),
 
             'capitecQuery' => DB::table('mercantile_user_policies')
             ->join('mercantile_transactions', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_transactions.policy_id')
@@ -77,7 +78,7 @@ class MercantileController extends Controller
             ->join('mercantile_user_banks', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_user_banks.policy_id')
             ->where('mercantile_user_banks.UserBankType', '=', 'Capitec')
             //->where('mercantile_transactions.Processed', '=', '0')
-            ->paginate(30)
+            ->paginate(20)
         ]);
 
         

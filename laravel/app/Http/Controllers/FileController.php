@@ -274,7 +274,6 @@ class FileController extends Controller
                     );
                 }
             });
-            // return page view here
             return redirect()->route('file-export-mercantile-index');
 
         } elseif($request->file_type == 'BotswanaInstallHeaderRecord'){
@@ -634,7 +633,8 @@ class FileController extends Controller
             return view('FileImport.file-import')->withErrors(['msg' => 'Please select a file to upload']);
         }
 
-        $myfile = fopen("BotswanaExport_".date("Y_m_d").".txt", "a") or die("Unable to open file!");
+        //$myfile = fopen("BotswanaExport_".date("Y_m_d").".txt", "a") or die("Unable to open file!");
+        $myfile = fopen("Mercantile_Capitec".date("Y_m_d").".txt", "a") or die("Unable to open file!");
         if ( $xlsx = SimpleXLSX::parse($request->file('file')) ) {
             foreach($xlsx->rows() as $row){
                 fwrite($myfile, implode(',',$row) . PHP_EOL);

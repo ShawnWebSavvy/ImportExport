@@ -20,21 +20,18 @@
                             </br></br>
                             <table class="table table-bordered">
                                 <tr>
-                                    <th>Policy</th>
+                                    <th>Policy Number</th>
+                                    <th>Full Name</th>
                                     <th>Action Date</th>
-                                    <th>User Full Name</th>
-                                    <th>Transaction</th>
                                 </tr>
                                 @foreach ($nedbankQuery as $row)
                                 <tr>
                                     <td>{{ $row->PolicyNumber }}</td>
-                                    <td>{{ $row->ActionDate }}</td>
                                     <td>{{ $row->AccountHolderFullName }}</td>
-                                    <td>{{ $row->TransactionUniqueID }}</td>
+                                    <td>{{ $row->ActionDate }}</td>
                                 </tr>
                                 @endforeach
                             </table>
-                            {!! $nedbankQuery->links() !!}
                         </div>
                     
                         <div class="col-sm-6">
@@ -48,34 +45,36 @@
                                         <input type="date" id="actionDateTo" name="actionDateTo">
                                         <button class="btn btn-success">Download</button>
 
-                                        <div class="col-sm-12">
+                                        <div>
                                         @if($errors->any())
-                                            <br/>
                                             <h5>{{$errors->first()}}</h5>
                                         @endif
-                                        </div>
+                                        <div>
                                         
                                 </form>
                                 </br></br>
                                 <table class="table table-bordered">
                                     <tr>
-                                        <th>Policy</th>
+                                        <th>Policy Number</th>
+                                        <th>Full Name</th>
                                         <th>Action Date</th>
-                                        <th>User Full Name</th>
-                                        <th>Transaction</th>
                                     </tr>
                                     @foreach ($capitecQuery as $row)
                                     <tr>
                                         <td>{{ $row->PolicyNumber }}</td>
-                                        <td>{{ $row->ActionDate }}</td>
                                         <td>{{ $row->AccountHolderFullName }}</td>
-                                        <td>{{ $row->TransactionUniqueID }}</td>
+                                        <td>{{ $row->ActionDate }}</td>
                                     </tr>
                                     @endforeach
                                 </table>
-                                {!! $capitecQuery->links() !!}
                         </div>
                     </div>
+                </div>
+                <div class="row">
+                    {!! $nedbankQuery->links() !!} &nbsp; Nedbank
+                </div>
+                <div class="row">
+                    {!! $capitecQuery->links() !!} &nbsp; Capitec
                 </div>
             </div>
         </div>
