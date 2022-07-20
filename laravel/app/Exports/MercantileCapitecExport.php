@@ -123,7 +123,6 @@ class MercantileCapitecExport implements FromCollection, WithHeadings
                 ->join('mercantile_users', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_users.policy_id')
                 ->join('mercantile_user_banks', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_user_banks.policy_id')
                 ->where('mercantile_user_banks.UserBankType', '=', 'Capitec')
-                ->whereBetween('mercantile_transactions.ActionDate', [$actionDateFrom, $actionDateTo])
                 ->orderBy('ActionDate','asc')
                 ->get();
 
@@ -134,7 +133,6 @@ class MercantileCapitecExport implements FromCollection, WithHeadings
         $GLOBALS['actionDateFrom'] = $actionDateFrom;
         $GLOBALS['actionDateTo'] = $actionDateTo;
         $GLOBALS['hashTotalAccountNumber'] = 0;
-        $GLOBALS['run'] = 0;
 
         $actionDateFrom = explode("-", $actionDateFrom);
         $actionDateFrom = implode("", $actionDateFrom);
@@ -145,7 +143,6 @@ class MercantileCapitecExport implements FromCollection, WithHeadings
         $GLOBALS['actionDateTo'] = $actionDateTo = $purgeDate = substr($actionDateTo, 2); 
 
         $array = $export->map(function ($export, $key) { //$array = $export->map(function ($export) {
-            $GLOBALS['run'] = $GLOBALS['run'] + 1;
             // set transaction type
             $TransactionType = $export->TransactionType;
             if($TransactionType == '0000'){
