@@ -9,6 +9,7 @@ use App\Models\MercantileUserBank;
 use App\Models\MercantileUserPolicy;
 use App\Models\MercantileTransactionRejections;
 use App\Models\MercantileNominatedBank;
+use App\Models\MercantileHeader;
 use Maatwebsite\Excel\Facades\Excel;
 use Spatie\SimpleExcel\SimpleExcelReader;
 use Spatie\SimpleExcel\SimpleExcelWriter;
@@ -24,45 +25,8 @@ class MercantileController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function fileExportMercantileIndex(){
-        /*
-        $namibia_table = FileImportNamibia::latest()->paginate(15);
-        return view('FileImport.file-export-namibia-index',compact('namibia_table'))
-            ->with('i', (request()->input('page', 1) - 1) * 5);
-        */
-
-        /*
-        <th>Policy</th>                     -->     mercantie_(all)
-        <th>Action Date</th>                -->     mercantile_transaction
-        <th>User Full Name</th>             -->     mercantile_users
-
-        NB - Bank - Nedbank - Capitec       -->     mercantile_banks
-        */
-
-        /*
-        $nedbankQuery = DB::table('mercantile_user_policies')
-        ->join('mercantile_transactions', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_transactions.policy_id')
-        ->join('mercantile_users', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_users.policy_id')
-        ->join('mercantile_user_banks', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_user_banks.policy_id')
-        ->where('mercantile_user_banks.UserBankType', '=', 'Nedbank')
-        ->where('mercantile_transactions.Processed', '=', '0')
-        ->paginate(15);
-
-        $capitecQuery = DB::table('mercantile_user_policies')
-        ->join('mercantile_transactions', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_transactions.policy_id')
-        ->join('mercantile_users', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_users.policy_id')
-        ->join('mercantile_user_banks', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_user_banks.policy_id')
-        ->where('mercantile_user_banks.UserBankType', '=', 'Capitec')
-        ->where('mercantile_transactions.Processed', '=', '0')
-        ->paginate(15);
-        */
-
-        /*
-        return view('Mercantile.file-export-mercantile-index',
-        compact('nedbankQuery'))
-            ->with('i', (request()->input('page', 1) - 1) * 5);
-        */
-        
+    public function fileExportMercantileIndex()
+    {        
         return view('Mercantile.file-export-mercantile-index', [
             'nedbankQuery' => DB::table('mercantile_user_policies')
             ->join('mercantile_transactions', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_transactions.policy_id')
@@ -80,15 +44,6 @@ class MercantileController extends Controller
             //->where('mercantile_transactions.Processed', '=', '0')
             ->paginate(20)
         ]);
-
-        
-        //return view('Mercantile.file-export-mercantile-index');
-
-        /*
-        $namibia_table = FileImportNamibia::latest()->paginate(15);
-        return view('Mercantile.file-export-mercantile-index',compact('namibia_table'))
-            ->with('i', (request()->input('page', 1) - 1) * 5);
-        */
     }
 
     public function fileExportMercantileNedbank(Request $request)
@@ -100,6 +55,82 @@ class MercantileController extends Controller
             ->where('mercantile_user_banks.UserBankType', '=', 'Nedbank')
             ->orderBy('ActionDate','asc')
             ->get();
+
+        $transactionTotalCount = count($export);
+        
+        $transactionTotalAmount = DB::table('mercantile_transactions')
+        ->join('mercantile_user_banks', 'mercantile_transactions.policy_id', '=', 'mercantile_user_banks.policy_id')
+        ->where('mercantile_user_banks.UserBankType', '=', 'Nedbank')
+        ->sum('Amount');
+        
+        $header = DB::table('mercantile_headers')->first();
+        
+        $myfile = fopen("MercantileNedbank.txt", "w") or die("Unable to open file!");
+        fwrite($myfile, $header->HeaderRow);
+        fclose($myfile);
+        
+        $str_length = strlen($transactionTotalCount);
+        $zero = '00000000';
+        $transactionTotalCount = $zero . $transactionTotalCount;
+        $transactionTotalCount = substr($transactionTotalCount, $str_length, 8);
+
+        $transactionTotalAmount = str_replace(".0","",$transactionTotalAmount);
+        $str_length = strlen($transactionTotalAmount);
+        $zero = '000000000000000000';
+        $transactionTotalAmount = $zero . $transactionTotalAmount;
+        $transactionTotalAmount = substr($transactionTotalAmount, $str_length, 18);
+
+        $trailer = '03'.$transactionTotalCount.$transactionTotalAmount.'                                                                                                                                                                                                                                                                            ';
+        //dd($actionDate);
+
+        //$header->HeaderRow
+        $nominatedAccountNumber = substr($header->HeaderRow, 2, 16);
+        //dd($nominatedAccountNumber);
+
+        $myfile = fopen("MercantileNedbank.txt", "a") or die("Unable to open file!");
+        foreach($export as $key => $v){
+            $actionDate = implode("", explode("-", $v->ActionDate));
+            $spaces = ' '; 
+            $BDF_Indicator = $v->BDF_Indicator . $spaces;
+            $BDF_Indicator = substr($BDF_Indicator, 0, 1);
+
+            $row = $v->RecordIdentifier.$nominatedAccountNumber.$v->PaymentReference.$v->UserBranchCode.$v->UserAccountNumber.
+            $v->Amount.$actionDate.$v->TransactionUniqueID.$v->AccountHolderFullName.$v->TransactionType.
+            $v->ClientType.$nominatedAccountNumber.$v->ServiceType.$v->PaymentReference.$v->EntryClass.
+            $v->NominatedAccountReference.$BDF_Indicator.
+            '                                                                           '."\n";
+            fwrite($myfile, $row);
+        }
+        fwrite($myfile, $trailer);
+        fclose($myfile);
+
+        // delete nedbank transactions
+        DB::table('mercantile_transactions')
+        ->join('mercantile_user_banks', 'mercantile_transactions.policy_id', '=', 'mercantile_user_banks.policy_id')
+        ->where('mercantile_user_banks.UserBankType', '=', 'Nedbank')
+        ->delete(); 
+        /*
+        foreach($export as $value){
+            DB::table('mercantile_capitec_transactions_archives')->insert(
+                array(
+                    'RecordIdentifier' => $value->RecordIdentifier,
+                    'PaymentReference' => $value->PaymentReference,
+                    'Amount' => $value->Amount,
+                    'ActionDate' => $value->ActionDate,
+                    'TransactionUniqueID' => $value->TransactionUniqueID,
+                    'StatementReference' => $value->StatementReference,
+                    'CycleDate' => $value->CycleDate,
+                    'TransactionType' => $value->TransactionType,
+                    'ServiceType' => $value->ServiceType,
+                    'OriginalPaymentReference' => $value->OriginalPaymentReference,
+                    'EntryClass' => $value->EntryClass,
+                    'NominatedAccountReference' => $value->NominatedAccountReference,
+                    'BDF_Indicator' => $value->BDF_Indicator,
+                    'policy_id' => $value->policy_id,
+                )
+            );
+        }
+        */
     }
     public function fileExportMercantileCapitec(Request $request)
     {
@@ -113,13 +144,16 @@ class MercantileController extends Controller
         
         // debit total
         $debitTotal = DB::table('mercantile_transactions')
+        ->join('mercantile_user_banks', 'mercantile_transactions.policy_id', '=', 'mercantile_user_banks.policy_id')
         ->where('TransactionType', '=', '0000')
+        ->where('mercantile_user_banks.UserBankType', '=', 'Capitec')
         ->sum('Amount');
         // credit total
         $creditTotal = DB::table('mercantile_transactions')
+        ->join('mercantile_user_banks', 'mercantile_transactions.policy_id', '=', 'mercantile_user_banks.policy_id')
         ->where('TransactionType', '=', '9999')
+        ->where('mercantile_user_banks.UserBankType', '=', 'Capitec')
         ->sum('Amount');
-        
         // Build Header
         // get Dates, now, from and to
         $dateNow = date('Y-m-d');
@@ -290,7 +324,6 @@ class MercantileController extends Controller
         // delete and push to archive
         DB::table('mercantile_transactions')
         ->join('mercantile_user_banks', 'mercantile_transactions.policy_id', '=', 'mercantile_user_banks.policy_id')
-        ->whereBetween('ActionDate', [$actionDateFrom, $actionDateTo])
         ->where('mercantile_user_banks.UserBankType', '=', 'Capitec')
         ->delete();
 
