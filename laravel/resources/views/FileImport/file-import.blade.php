@@ -43,7 +43,7 @@
                                                 <label for="banks">Upload Type</label><br>
 
                                                 <input type="radio" id="Capitec" name="file_type" value="Capitec" checked='checked'>
-                                                <label for="Capitec">Capitec</label><br>
+                                                <label for="Capitec">Capitec POC</label><br>
 
                                                 <input type="radio" id="Botswana" name="file_type" value="Botswana">
                                                 <label for="Botswana">Botswana</label><br>
