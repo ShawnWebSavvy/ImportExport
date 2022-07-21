@@ -204,7 +204,7 @@ class MercantileController extends Controller
         // write header to text file
         // use 'w' to clear text file, other inserts will b 'a'
         $header = 'H04Test'.$dateNow.$dateNow.$actionDateFrom.$actionDateTo.'000001'.$generation_number."\n";
-        $myfile = fopen("newfile.txt", "w") or die("Unable to open file!");
+        $myfile = fopen("MercantileCapitec.txt", "w") or die("Unable to open file!");
         fwrite($myfile, $header);
         fclose($myfile);
 
@@ -212,7 +212,7 @@ class MercantileController extends Controller
         $hashTotalAccountNumber = $credit_transaction = $debit_transaction = 0;
         // trailer settings
 
-        $myfile = fopen("newfile.txt", "a") or die("Unable to open file!");
+        $myfile = fopen("MercantileCapitec.txt", "a") or die("Unable to open file!");
         // build transaction records
         foreach($export as $key => $value){
             $TransactionType = $value->TransactionType;
