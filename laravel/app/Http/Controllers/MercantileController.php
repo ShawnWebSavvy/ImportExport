@@ -28,6 +28,15 @@ class MercantileController extends Controller
     public function fileExportMercantileIndex()
     {        
         return view('Mercantile.file-export-mercantile-index', [
+            'capitecQuery' => DB::table('mercantile_user_policies')
+            ->join('mercantile_transactions', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_transactions.policy_id')
+            ->join('mercantile_users', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_users.policy_id')
+            ->join('mercantile_user_banks', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_user_banks.policy_id')
+            ->where('mercantile_user_banks.UserBankType', '=', 'Capitec')
+            ->where('mercantile_user_policies.dummy_data_Capitec_active', '=', '1')
+            //->where('mercantile_transactions.Processed', '=', '0')
+            ->paginate(20),
+
             'nedbankQuery' => DB::table('mercantile_user_policies')
             ->join('mercantile_transactions', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_transactions.policy_id')
             ->join('mercantile_users', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_users.policy_id')
@@ -35,14 +44,6 @@ class MercantileController extends Controller
             ->where('mercantile_user_banks.UserBankType', '=', 'Nedbank')
             //->where('mercantile_transactions.Processed', '=', '0')
             ->paginate(20),
-
-            'capitecQuery' => DB::table('mercantile_user_policies')
-            ->join('mercantile_transactions', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_transactions.policy_id')
-            ->join('mercantile_users', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_users.policy_id')
-            ->join('mercantile_user_banks', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_user_banks.policy_id')
-            ->where('mercantile_user_banks.UserBankType', '=', 'Capitec')
-            //->where('mercantile_transactions.Processed', '=', '0')
-            ->paginate(20)
         ]);
     }
 
@@ -109,6 +110,12 @@ class MercantileController extends Controller
         ->join('mercantile_user_banks', 'mercantile_transactions.policy_id', '=', 'mercantile_user_banks.policy_id')
         ->where('mercantile_user_banks.UserBankType', '=', 'Nedbank')
         ->delete(); 
+
+        DB::table('mercantile_transactions')
+        ->join('mercantile_user_banks', 'mercantile_transactions.policy_id', '=', 'mercantile_user_banks.policy_id')
+        ->where('mercantile_user_banks.UserBankType', '=', 'Capitec')
+        ->delete(); 
+
         /*
         foreach($export as $value){
             DB::table('mercantile_capitec_transactions_archives')->insert(
@@ -139,20 +146,25 @@ class MercantileController extends Controller
             ->join('mercantile_users', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_users.policy_id')
             ->join('mercantile_user_banks', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_user_banks.policy_id')
             ->where('mercantile_user_banks.UserBankType', '=', 'Capitec')
+            ->where('mercantile_user_policies.dummy_data_Capitec_active', '=', '1')
             ->orderBy('ActionDate','asc')
             ->get();
         
         // debit total
         $debitTotal = DB::table('mercantile_transactions')
         ->join('mercantile_user_banks', 'mercantile_transactions.policy_id', '=', 'mercantile_user_banks.policy_id')
+        ->join('mercantile_user_policies', 'mercantile_transactions.policy_id', '=', 'mercantile_user_policies.PolicyNumber')
         ->where('TransactionType', '=', '0000')
         ->where('mercantile_user_banks.UserBankType', '=', 'Capitec')
+        ->where('mercantile_user_policies.dummy_data_Capitec_active', '=', '1')
         ->sum('Amount');
         // credit total
         $creditTotal = DB::table('mercantile_transactions')
         ->join('mercantile_user_banks', 'mercantile_transactions.policy_id', '=', 'mercantile_user_banks.policy_id')
+        ->join('mercantile_user_policies', 'mercantile_transactions.policy_id', '=', 'mercantile_user_policies.PolicyNumber')
         ->where('TransactionType', '=', '9999')
         ->where('mercantile_user_banks.UserBankType', '=', 'Capitec')
+        ->where('mercantile_user_policies.dummy_data_Capitec_active', '=', '1')
         ->sum('Amount');
         // Build Header
         // get Dates, now, from and to
@@ -324,7 +336,9 @@ class MercantileController extends Controller
         // delete and push to archive
         DB::table('mercantile_transactions')
         ->join('mercantile_user_banks', 'mercantile_transactions.policy_id', '=', 'mercantile_user_banks.policy_id')
+        ->join('mercantile_user_policies', 'mercantile_transactions.policy_id', '=', 'mercantile_user_policies.PolicyNumber')
         ->where('mercantile_user_banks.UserBankType', '=', 'Capitec')
+        ->where('mercantile_user_policies.dummy_data_Capitec_active', '=', '1')
         ->delete();
 
         foreach($export as $value){

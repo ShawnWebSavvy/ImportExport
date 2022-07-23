@@ -16,7 +16,9 @@ class CreateMercantileUserPoliciesTable extends Migration
         Schema::create('mercantile_user_policies', function (Blueprint $table) {
             $table->increments('id')->length(10);
             
-            $table->string('PolicyNumber', 20)->nullable()->unique();;
+            $table->string('PolicyNumber', 20)->nullable()->unique();
+
+            $table->boolean('dummy_data_Capitec_active', 1)->nullable();
             
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent();
