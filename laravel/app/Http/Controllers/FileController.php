@@ -150,6 +150,8 @@ class FileController extends Controller
                 $DestinationAccountNumber = substr($rowProperties[0], 58, 16); /* User */
                 $DestinationBranchCode = substr($rowProperties[0], 52, 6); /* User */
                 $PaymentReference = substr($rowProperties[0], 18, 34);
+                $TransactionOrder = substr($PaymentReference, 24, 10);
+
                 $Amount = substr($rowProperties[0], 74, 12);
                 $ActionDate = substr($rowProperties[0], 86, 8);
                 $TransactionUniqueID = substr($rowProperties[0], 94, 30);
@@ -223,6 +225,7 @@ class FileController extends Controller
                             'StatementReference' => $StatementReference,
                             'CycleDate' => $CycleDate,
                             'TransactionType' => $TransactionType,
+                            'TransactionOrder' => $TransactionOrder,
                             'ServiceType' => $ServiceType,
                             'OriginalPaymentReference' => $OriginalPaymentReference,
                             'EntryClass' => $EntryClass,
@@ -246,7 +249,7 @@ class FileController extends Controller
                 ->join('mercantile_user_banks', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_user_banks.policy_id')
                 ->where('mercantile_user_banks.UserBankType', '=', 'Capitec')
                 ->where('mercantile_user_policies.dummy_data_Capitec_active', '=', '1')
-                ->orderBy('ActionDate','asc')
+                ->orderBy('TransactionOrder','asc')
                 ->get();
             // debit total
             $debitTotal = DB::table('mercantile_transactions')
@@ -491,21 +494,14 @@ class FileController extends Controller
                 ->join('mercantile_users', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_users.policy_id')
                 ->join('mercantile_user_banks', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_user_banks.policy_id')
                 ->where('mercantile_user_banks.UserBankType', '=', 'Nedbank')
-                ->orderBy('ActionDate','asc')
-                ->get();
-            
-            $export_capitec = DB::table('mercantile_user_policies')
-                ->join('mercantile_transactions', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_transactions.policy_id')
-                ->join('mercantile_users', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_users.policy_id')
-                ->join('mercantile_user_banks', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_user_banks.policy_id')
-                ->where('mercantile_user_banks.UserBankType', ';=', 'Capitec')
+
+                ->orWhere('mercantile_user_banks.UserBankType', '=', 'Capitec')
                 ->where('dummy_data_Capitec_active', '=', '0')
-                ->orderBy('ActionDate','asc')
+
+                ->orderBy('TransactionOrder','asc')
                 ->get();
-            
-            $Count = count($export);
-            $_Count_ = count($export_capitec);
-            $transactionTotalCount = $Count + $_Count_;
+ 
+            $transactionTotalCount = count($export);
 
             $transactionTotalAmount = DB::table('mercantile_transactions')
             ->join('mercantile_user_banks', 'mercantile_transactions.policy_id', '=', 'mercantile_user_banks.policy_id')
@@ -540,28 +536,9 @@ class FileController extends Controller
             $trailer = '03'.$transactionTotalCount.$transactionTotalAmount.'                                                                                                                                                                                                                                                                            ';
 
             //$header->HeaderRow
-            $nominatedAccountNumber = substr($header->HeaderRow, 38, 32);
+            $nominatedAccountNumber = substr($header->HeaderRow, 38, 16);
 
             $myfile = fopen("MercantileNedbank.txt", "a") or die("Unable to open file!");
-            
-            foreach($export_capitec as $key => $v){
-                $actionDate = implode("", explode("-", $v->ActionDate));
-                $ActionDate = substr($ActionDate, 2, 6);
-                $spaces = ' '; 
-                $BDF_Indicator = $v->BDF_Indicator . $spaces;
-                $BDF_Indicator = substr($BDF_Indicator, 0, 1);
-
-                $row = 
-                $v->RecordIdentifier.$nominatedAccountNumber.$v->PaymentReference.$v->UserBranchCode.$v->UserAccountNumber.
-                $v->Amount.$actionDate.$v->TransactionUniqueID.$v->AccountHolderFullName.$v->TransactionType.
-                $v->ClientType.$nominatedAccountNumber.$v->ServiceType.
-                //$v->PaymentReference.
-                '                                  '.
-                $v->EntryClass.
-                $v->NominatedAccountReference.$BDF_Indicator.
-                '                                                                           '."\n";
-                fwrite($myfile, $row);
-            }
             
             foreach($export as $key => $v){
                 $actionDate = implode("", explode("-", $v->ActionDate));
@@ -581,6 +558,7 @@ class FileController extends Controller
                 '                                                                           '."\n";
                 fwrite($myfile, $row);
             }
+            
             fwrite($myfile, $trailer);
             fclose($myfile);
 

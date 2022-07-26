@@ -25,6 +25,7 @@ class CreateMercantileTransactionsTable extends Migration
             $table->string('StatementReference', 20)->nullable();
             $table->date('CycleDate')->nullable();
             $table->char('TransactionType', 4)->nullable();
+            $table->char('TransactionOrder', 10)->nullable();
             
             $table->char('ServiceType', 2)->nullable();
             $table->string('OriginalPaymentReference', 35)->nullable();
