@@ -42,10 +42,10 @@
                                             <div class="col-md-6">
                                                 <label for="banks">Upload Type</label><br>
 
-                                                <input type="radio" id="Capitec" name="file_type" value="Capitec" checked='checked'>
+                                                <input type="radio" id="Capitec" name="file_type" value="Capitec">
                                                 <label for="Capitec">Capitec POC</label><br>
 
-                                                <input type="radio" id="CapitecRejections" name="file_type" value="CapitecRejections">
+                                                <input type="radio" id="CapitecRejections" name="file_type" value="CapitecRejections" checked='checked'>
                                                 <label for="CapitecRejections">Capitec Rejections</label><br>
 
                                                 <input type="radio" id="Botswana" name="file_type" value="Botswana">
@@ -87,6 +87,7 @@
                             </div>
                         </div>
                     </form>
+                    <!--
                     </br></br></br></br>
                     <form action="{{ route('file-export-botswana-totext') }}" method="POST" enctype="multipart/form-data">
                         @csrf
@@ -112,7 +113,7 @@
                             </div>
                         </div>
                     </form>
-
+                    -->
                     <div class="row">
                         <div class="col-md-2">
                         </div>

@@ -22,6 +22,7 @@ use App\Models\MercantileNominatedBank;
 use App\Models\MercantileHeader;
 use App\Exports\NamibiaExport;
 use App\Exports\BotswanaExport;
+use App\Exports\MercantileCapitecRejectionsExport;
 use App\Exports\BotswanaRecordUserTrailerExport;
 use App\Exports\BotswanaRecordUserHeaderExport;
 use App\Exports\BotswanaRecordTransactionExport;
@@ -473,6 +474,7 @@ class FileController extends Controller
                         'StatementReference' => $value->StatementReference,
                         'CycleDate' => $value->CycleDate,
                         'TransactionType' => $value->TransactionType,
+                        'TransactionOrder' => $value->TransactionOrder,
                         'ServiceType' => $value->ServiceType,
                         'OriginalPaymentReference' => $value->OriginalPaymentReference,
                         'EntryClass' => $value->EntryClass,
@@ -599,9 +601,80 @@ class FileController extends Controller
             */
             // ^ Process Nedbank ^
         } elseif($request->file_type == 'CapitecRejections'){ /* **** Capitec Rejections **** */
-            dd('CapitecRejections');
+            DB::table('mercantile_capitec_rejections')
+                ->where('Processed', 0)
+                ->update(['Processed' => 1,]);
+            
+            $rows = SimpleExcelReader::create($pathToFile, 'xlsx')
+            ->noHeaderRow()
+            ->getRows();
+
+            $rows->each(function(array $rowProperties) {
+                $RecordIdentifier = substr($rowProperties[0], 0, 2);
+                $AccountHolderFullName = substr($rowProperties[0], 124, 30);
+                $explode = explode(" ", $AccountHolderFullName);
+                $AccountHolderSurame = $explode[0];
+                $AccountHolderInitials = trim($explode[1]);
+
+                $DestinationAccountNumber = substr($rowProperties[0], 58, 16); /* User */
+                $DestinationBranchCode = substr($rowProperties[0], 52, 6); /* User */
+                $PaymentReference = substr($rowProperties[0], 18, 34);
+                $TransactionOrder = substr($PaymentReference, 24, 10);
+
+                $Amount = substr($rowProperties[0], 74, 12);
+                $ActionDate = substr($rowProperties[0], 86, 8);
+                $TransactionUniqueID = substr($rowProperties[0], 94, 30);
+                $StatementReference = substr($rowProperties[0], 94, 10);
+                $PolicyNumber = $ContractReference = substr($rowProperties[0], 104, 14);
+                $CycleDate = substr($rowProperties[0], 118, 6);
+                
+                $TransactionType = substr($rowProperties[0], 154, 4);
+                $ClientType = substr($rowProperties[0], 158, 2);
+                $ChargesAccountNumber = substr($rowProperties[0], 160, 16); /* Leza */
+                $ServiceType = substr($rowProperties[0], 176, 2);
+                $OriginalPaymentReference = substr($rowProperties[0], 178, 34);
+                $EntryClass = substr($rowProperties[0], 212, 2);
+                $NominatedAccountReference = substr($rowProperties[0], 214, 30);
+                $NominatedAccountNumber = substr($rowProperties[0], 2, 16);
+                $BDF_Indicator = substr($rowProperties[0], 244, 1);
+                
+                // capitec branch code 470010
+                $BankType = 'Capitec';
+                if($DestinationBranchCode != '470010'){$BankType = 'Nedbank';}
+
+                if($BankType == 'Capitec'){
+                    if($RecordIdentifier == '02'){
+                        $check = DB::table('mercantile_user_policies')
+                        ->where('PolicyNumber', '=', $PolicyNumber)
+                        ->where('dummy_data_Capitec_active', '=', '1')
+                        ->first();
+
+                        if ($check) {
+                            $transacion = DB::table('mercantile_capitec_transactions_archives')
+                                ->where('policy_id', '=', $PolicyNumber)
+                                ->where('Processed', '=', '0')
+                                ->first();
+
+                            DB::table('mercantile_capitec_rejections')->insert(
+                                array(
+                                    'policy_id' => $PolicyNumber,
+                                    'Processed' => '0',
+                                    'transaction_id' => $transacion->id,
+                                    'Amount' => $Amount,
+                                )
+                            );
+                        }
+                    }
+                }
+            }); 
+            // v Process Refections v
+            // back into original format
+            // excel export
+            $downloadDocName = 'CapitecRejectionsExport_'.date("Y_m_d").'.xlsx';
+            return Excel::download(new MercantileCapitecRejectionsExport, $downloadDocName);
+            // ^ Process Refections ^
         }
-        return redirect()->route('file-export-mercantile-index');
+        return redirect()->route('file-import');
     }
     public function fileExportIndex() {
         // return an export dashboard

@@ -21,7 +21,8 @@ class CreateMercantileNedbankRejectionsTable extends Migration
 
             $table->integer('transaction_id')->length(10)->unsigned()->index()->nullable(false);
             $table->foreign('transaction_id')->references('id')->on('mercantile_nedbank_transactions_archives');
-
+            $table->char('Amount', 12)->nullable();
+            
             $table->boolean('Processed', 0)->nullable();
 
             $table->timestamp('created_at')->useCurrent();
