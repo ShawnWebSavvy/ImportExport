@@ -53,6 +53,7 @@ class FileController extends Controller
     }
 
     public function fileUpload(Request $request) {
+        dd('ff');
         // check if file uploaded
         if (!$request->hasFile('file')) {
             return view('FileImport.file-import')->withErrors(['msg' => 'Please select a file to upload']);
@@ -138,44 +139,44 @@ class FileController extends Controller
             return redirect()->route('file-export-botswana-index');
         
         } elseif($request->file_type == 'Capitec'){ /* **** Capitec **** */
-            $rows = SimpleExcelReader::create($pathToFile, 'xlsx')
-            ->noHeaderRow()
-            ->getRows();
+            $file = fopen($pathToFile,"r");
+            while(! feof($file)){
+                $rowProperties = fgets($file);
+                $RecordIdentifier = substr($rowProperties, 0, 2);
 
-            $rows->each(function(array $rowProperties) {
-                $RecordIdentifier = substr($rowProperties[0], 0, 2);
-                $AccountHolderFullName = substr($rowProperties[0], 124, 30);
-                $explode = explode(" ", $AccountHolderFullName);
-                $AccountHolderSurame = $explode[0];
-                $AccountHolderInitials = trim($explode[1]);
-
-                $DestinationAccountNumber = substr($rowProperties[0], 58, 16); /* User */
-                $DestinationBranchCode = substr($rowProperties[0], 52, 6); /* User */
-                $PaymentReference = substr($rowProperties[0], 18, 34);
-                $TransactionOrder = substr($PaymentReference, 24, 10);
-
-                $Amount = substr($rowProperties[0], 74, 12);
-                $ActionDate = substr($rowProperties[0], 86, 8);
-                $TransactionUniqueID = substr($rowProperties[0], 94, 30);
-                $StatementReference = substr($rowProperties[0], 94, 10);
-                $PolicyNumber = $ContractReference = substr($rowProperties[0], 104, 14);
-                $CycleDate = substr($rowProperties[0], 118, 6);
-                
-                $TransactionType = substr($rowProperties[0], 154, 4);
-                $ClientType = substr($rowProperties[0], 158, 2);
-                $ChargesAccountNumber = substr($rowProperties[0], 160, 16); /* Leza */
-                $ServiceType = substr($rowProperties[0], 176, 2);
-                $OriginalPaymentReference = substr($rowProperties[0], 178, 34);
-                $EntryClass = substr($rowProperties[0], 212, 2);
-                $NominatedAccountReference = substr($rowProperties[0], 214, 30);
-                $NominatedAccountNumber = substr($rowProperties[0], 2, 16);
-                $BDF_Indicator = substr($rowProperties[0], 244, 1);
-                
-                // capitec branch code 470010
-                $BankType = 'Capitec';
-                if($DestinationBranchCode != '470010'){$BankType = 'Nedbank';}
-                
                 if($RecordIdentifier == '02'){
+                    $AccountHolderFullName = substr($rowProperties, 124, 30);
+                    $explode = explode(" ", $AccountHolderFullName);
+                    $AccountHolderSurame = $explode[0];
+                    $AccountHolderInitials = trim($explode[1]);
+    
+                    $DestinationAccountNumber = substr($rowProperties, 58, 16); /* User */
+                    $DestinationBranchCode = substr($rowProperties, 52, 6); /* User */
+                    $PaymentReference = substr($rowProperties, 18, 34);
+                    $TransactionOrder = substr($PaymentReference, 24, 10);
+    
+                    $Amount = substr($rowProperties, 74, 12);
+                    $ActionDate = substr($rowProperties, 86, 8);
+                    $TransactionUniqueID = substr($rowProperties, 94, 30);
+                    $StatementReference = substr($rowProperties, 94, 10);
+                    $PolicyNumber = $ContractReference = substr($rowProperties, 104, 14);
+                    $CycleDate = substr($rowProperties, 118, 6);
+                    
+                    $TransactionType = substr($rowProperties, 154, 4);
+                    $ClientType = substr($rowProperties, 158, 2);
+                    $ChargesAccountNumber = substr($rowProperties, 160, 16); /* Leza */
+                    $ServiceType = substr($rowProperties, 176, 2);
+                    $OriginalPaymentReference = substr($rowProperties, 178, 34);
+                    $EntryClass = substr($rowProperties, 212, 2);
+                    $NominatedAccountReference = substr($rowProperties, 214, 30);
+                    $NominatedAccountNumber = substr($rowProperties, 2, 16);
+                    $BDF_Indicator = substr($rowProperties, 244, 1);
+
+                    $BankType = 'Capitec';
+                    if($DestinationBranchCode != '470010'){$BankType = 'Nedbank';}
+                    
+                    
+                    //if($RecordIdentifier == '02'){
                     // need to check if Policy Number exists
                     // update records if yes, insert if no
                     $policy = DB::table('mercantile_user_policies')->where('PolicyNumber',$PolicyNumber)->first();
@@ -238,12 +239,12 @@ class FileController extends Controller
                         )
                     );
                 } else if($RecordIdentifier == '01'){
-                    //header row, saved for Nedbank export
                     DB::table('mercantile_headers')->delete();
-                    DB::table('mercantile_headers')->insert(array('HeaderRow' => $rowProperties[0]));
+                    DB::table('mercantile_headers')->insert(array('HeaderRow' => $rowProperties));
                 }
-            });
-            
+            }
+            fclose($file);
+
             // V Process Capitec  V
             $export = DB::table('mercantile_user_policies')
                 ->join('mercantile_transactions', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_transactions.policy_id')
@@ -552,16 +553,9 @@ class FileController extends Controller
                 $v->EntryClass.
                 $v->NominatedAccountReference.$BDF_Indicator.
                 '                                                                           ';
-                //fwrite($myfile, $row);
-                
                 Storage::disk('local')->append('MercantileNedbank.txt', $row);
             }
-            
-
             Storage::disk('local')->append('MercantileNedbank.txt', $trailer);
-            
-            //fwrite($myfile, $trailer);
-            //fclose($myfile);
 
             // delete nedbank transactions
             DB::table('mercantile_transactions')
@@ -666,12 +660,18 @@ class FileController extends Controller
                     }
                 }
             }); 
-            // v Process Refections v
+            // v Process Rejections v
+
+
+
+
             $downloadDocName = 'CapitecRejectionsExport_'.date("Y_m_d").'.xlsx';
             return Excel::download(new MercantileCapitecRejectionsExport, $downloadDocName);
             
-            // ^ Process Refections ^
+            // ^ Process Rejections ^
             return redirect()->route('file-import')->withErrors(['msg' => 'Rejections completed successfully']);
+
+
         }
         return redirect()->route('file-import');
     }

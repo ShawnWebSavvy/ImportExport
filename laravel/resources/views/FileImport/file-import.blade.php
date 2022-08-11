@@ -42,10 +42,10 @@
                                             <div class="col-md-6">
                                                 <label for="banks">Upload Type</label><br>
 
-                                                <input type="radio" id="Capitec" name="file_type" value="Capitec">
+                                                <input type="radio" id="Capitec" name="file_type" value="Capitec" checked='checked'>
                                                 <label for="Capitec">Capitec POC</label><br>
 
-                                                <input type="radio" id="CapitecRejections" name="file_type" value="CapitecRejections" checked='checked'>
+                                                <input type="radio" id="CapitecRejections" name="file_type" value="CapitecRejections">
                                                 <label for="CapitecRejections">Capitec Rejections</label><br>
 
                                                 <input type="radio" id="Botswana" name="file_type" value="Botswana">
