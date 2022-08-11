@@ -30,6 +30,7 @@ use App\Exports\BotswanaRecordInstallTrailerExport;
 use App\Exports\BotswanaRecordInstallHeaderExport;
 use App\Exports\BotswanaRecordContraExport;
 use App\Traits\Guid;
+use Illuminate\Support\Facades\Storage;
 
 //require 'vendor/autoload.php';
 
@@ -320,16 +321,14 @@ class FileController extends Controller
 
             // write header to text file
             // use 'w' to clear text file, other inserts will b 'a'
-            $header = 'H04Test'.$dateNow.$dateNow.$actionDateFrom.$actionDateTo.'000001'.$generation_number.'TWObDAYbbb'.'01'."\n";
-            $myfile = fopen("MercantileCapitec.txt", "w") or die("Unable to open file!");
-            fwrite($myfile, $header);
-            fclose($myfile);
+            $header = 'H04Test'.$dateNow.$dateNow.$actionDateFrom.$actionDateTo.'000001'.$generation_number.'TWObDAYbbb'.'01';
+            Storage::disk('local')->put('MercantileCapitec.txt', $header);
 
             // trailer settings
             $hashTotalAccountNumber = $credit_transaction = $debit_transaction = 0;
             // trailer settings
 
-            $myfile = fopen("MercantileCapitec.txt", "a") or die("Unable to open file!");
+            //$myfile = fopen("MercantileCapitec.txt", "a") or die("Unable to open file!");
             // build transaction records
             foreach($export as $key => $value){
                 $TransactionType = $value->TransactionType;
@@ -406,9 +405,9 @@ class FileController extends Controller
                 $std_transaction_record = 
                     $TransactionType.$UserBranchCode.$UserAccountNumber.$AccountType.
                     $Amount.$Company.$ClientIdentifier.$AccountHolderName.
-                    $ActionDate.$CDV_Mode.$EntryClass."\n";
+                    $ActionDate.$CDV_Mode.$EntryClass;
 
-                fwrite($myfile, $std_transaction_record);
+                Storage::disk('local')->append('MercantileCapitec.txt', $std_transaction_record);
 
                 // trailer record
                 if($key == $total_return -1){
@@ -446,7 +445,7 @@ class FileController extends Controller
                         $debit_transaction.$credit_transaction.$filler.
                         $debitTotal.$creditTotal.$hashTotal;
 
-                    fwrite($myfile, $trailer_record);
+                    Storage::disk('local')->append('MercantileCapitec.txt', $trailer_record);
                 }
             } // foreach($export as $key => $value){
 
@@ -486,20 +485,15 @@ class FileController extends Controller
                 );
             } 
             // ^ Process Capitec ^
-            
-
-
+            dd('dddd');
             // V Process Nedbank  V
-            
             $export = DB::table('mercantile_user_policies')
                 ->join('mercantile_transactions', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_transactions.policy_id')
                 ->join('mercantile_users', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_users.policy_id')
                 ->join('mercantile_user_banks', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_user_banks.policy_id')
                 ->where('mercantile_user_banks.UserBankType', '=', 'Nedbank')
-
                 ->orWhere('mercantile_user_banks.UserBankType', '=', 'Capitec')
                 ->where('dummy_data_Capitec_active', '=', '0')
-
                 ->orderBy('TransactionOrder','asc')
                 ->get();
  
@@ -517,13 +511,13 @@ class FileController extends Controller
             ->where('dummy_data_Capitec_active', '=', '0')
             ->sum('Amount');
 
-            
             $header = DB::table('mercantile_headers')->first();
-            
-            $myfile = fopen("MercantileNedbank.txt", "w") or die("Unable to open file!");
-            fwrite($myfile, $header->HeaderRow."\n");
-            fclose($myfile);
-            
+
+            //$myfile = fopen("MercantileNedbank.txt", "w") or die("Unable to open file!");
+            //fwrite($myfile, $header->HeaderRow."\n");
+            //fclose($myfile);
+            Storage::disk('local')->put('MercantileNedbank.txt', $header->HeaderRow);
+            //dd('ddee');
             $str_length = strlen($transactionTotalCount);
             $zero = '00000000';
             $transactionTotalCount = $zero . $transactionTotalCount;
@@ -540,7 +534,7 @@ class FileController extends Controller
             //$header->HeaderRow
             $nominatedAccountNumber = substr($header->HeaderRow, 38, 16);
 
-            $myfile = fopen("MercantileNedbank.txt", "a") or die("Unable to open file!");
+            //$myfile = fopen("MercantileNedbank.txt", "a") or die("Unable to open file!");
             
             foreach($export as $key => $v){
                 $actionDate = implode("", explode("-", $v->ActionDate));
@@ -557,19 +551,23 @@ class FileController extends Controller
                 '                                  '.
                 $v->EntryClass.
                 $v->NominatedAccountReference.$BDF_Indicator.
-                '                                                                           '."\n";
-                fwrite($myfile, $row);
+                '                                                                           ';
+                //fwrite($myfile, $row);
+                
+                Storage::disk('local')->append('MercantileNedbank.txt', $row);
             }
             
-            fwrite($myfile, $trailer);
-            fclose($myfile);
+
+            Storage::disk('local')->append('MercantileNedbank.txt', $trailer);
+            
+            //fwrite($myfile, $trailer);
+            //fclose($myfile);
 
             // delete nedbank transactions
             DB::table('mercantile_transactions')
             ->join('mercantile_user_banks', 'mercantile_transactions.policy_id', '=', 'mercantile_user_banks.policy_id')
             ->where('mercantile_user_banks.UserBankType', '=', 'Nedbank')
             ->delete(); 
-            
             
             DB::table('mercantile_transactions')
             ->join('mercantile_user_banks', 'mercantile_transactions.policy_id', '=', 'mercantile_user_banks.policy_id')
@@ -600,6 +598,7 @@ class FileController extends Controller
             }
             */
             // ^ Process Nedbank ^
+            return redirect()->route('file-import')->withErrors(['msg' => 'Mercantile transactions processed successfully']);
         } elseif($request->file_type == 'CapitecRejections'){ /* **** Capitec Rejections **** */
             DB::table('mercantile_capitec_rejections')
                 ->where('Processed', 0)
@@ -668,11 +667,11 @@ class FileController extends Controller
                 }
             }); 
             // v Process Refections v
-            // back into original format
-            // excel export
             $downloadDocName = 'CapitecRejectionsExport_'.date("Y_m_d").'.xlsx';
             return Excel::download(new MercantileCapitecRejectionsExport, $downloadDocName);
+            
             // ^ Process Refections ^
+            return redirect()->route('file-import')->withErrors(['msg' => 'Rejections completed successfully']);
         }
         return redirect()->route('file-import');
     }
