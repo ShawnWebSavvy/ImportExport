@@ -243,7 +243,7 @@ class FileController extends Controller
                     DB::table('mercantile_headers')->insert(array('HeaderRow' => $rowProperties[0]));
                 }
             });
-
+            
             // V Process Capitec  V
             $export = DB::table('mercantile_user_policies')
                 ->join('mercantile_transactions', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_transactions.policy_id')
@@ -485,7 +485,7 @@ class FileController extends Controller
                 );
             } 
             // ^ Process Capitec ^
-            dd('dddd');
+            
             // V Process Nedbank  V
             $export = DB::table('mercantile_user_policies')
                 ->join('mercantile_transactions', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_transactions.policy_id')
@@ -537,7 +537,7 @@ class FileController extends Controller
             //$myfile = fopen("MercantileNedbank.txt", "a") or die("Unable to open file!");
             
             foreach($export as $key => $v){
-                $actionDate = implode("", explode("-", $v->ActionDate));
+                $ActionDate = implode("", explode("-", $v->ActionDate));
                 $ActionDate = substr($ActionDate, 2, 6);
                 $spaces = ' '; 
                 $BDF_Indicator = $v->BDF_Indicator . $spaces;
@@ -545,7 +545,7 @@ class FileController extends Controller
 
                 $row = 
                 $v->RecordIdentifier.$nominatedAccountNumber.$v->PaymentReference.$v->UserBranchCode.$v->UserAccountNumber.
-                $v->Amount.$actionDate.$v->TransactionUniqueID.$v->AccountHolderFullName.$v->TransactionType.
+                $v->Amount.$ActionDate.$v->TransactionUniqueID.$v->AccountHolderFullName.$v->TransactionType.
                 $v->ClientType.$nominatedAccountNumber.$v->ServiceType.
                 //$v->PaymentReference.
                 '                                  '.
