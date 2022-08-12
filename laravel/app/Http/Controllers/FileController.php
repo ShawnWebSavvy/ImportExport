@@ -53,12 +53,10 @@ class FileController extends Controller
     }
 
     public function fileUpload(Request $request) {
-        dd('ff');
         // check if file uploaded
         if (!$request->hasFile('file')) {
             return view('FileImport.file-import')->withErrors(['msg' => 'Please select a file to upload']);
         }
-
         $pathToFile = $request->file('file');
 
         if($request->file_type == 'Namibia'){ /* **** Namibia **** */
@@ -149,19 +147,16 @@ class FileController extends Controller
                     $explode = explode(" ", $AccountHolderFullName);
                     $AccountHolderSurame = $explode[0];
                     $AccountHolderInitials = trim($explode[1]);
-    
                     $DestinationAccountNumber = substr($rowProperties, 58, 16); /* User */
                     $DestinationBranchCode = substr($rowProperties, 52, 6); /* User */
                     $PaymentReference = substr($rowProperties, 18, 34);
                     $TransactionOrder = substr($PaymentReference, 24, 10);
-    
                     $Amount = substr($rowProperties, 74, 12);
                     $ActionDate = substr($rowProperties, 86, 8);
                     $TransactionUniqueID = substr($rowProperties, 94, 30);
                     $StatementReference = substr($rowProperties, 94, 10);
                     $PolicyNumber = $ContractReference = substr($rowProperties, 104, 14);
                     $CycleDate = substr($rowProperties, 118, 6);
-                    
                     $TransactionType = substr($rowProperties, 154, 4);
                     $ClientType = substr($rowProperties, 158, 2);
                     $ChargesAccountNumber = substr($rowProperties, 160, 16); /* Leza */
@@ -175,10 +170,7 @@ class FileController extends Controller
                     $BankType = 'Capitec';
                     if($DestinationBranchCode != '470010'){$BankType = 'Nedbank';}
                     
-                    
-                    //if($RecordIdentifier == '02'){
-                    // need to check if Policy Number exists
-                    // update records if yes, insert if no
+                    // need to check if Policy Number exists -- update records if yes, insert if no
                     $policy = DB::table('mercantile_user_policies')->where('PolicyNumber',$PolicyNumber)->first();
                     if($policy){
                         /* policy number exists, update banking details */
@@ -323,7 +315,7 @@ class FileController extends Controller
             // write header to text file
             // use 'w' to clear text file, other inserts will b 'a'
             $header = 'H04Test'.$dateNow.$dateNow.$actionDateFrom.$actionDateTo.'000001'.$generation_number.'TWObDAYbbb'.'01';
-            Storage::disk('local')->put('MercantileCapitec.txt', $header);
+            Storage::disk('local')->put('MercantileCapitec_'.date("Y_m_d").'.txt', $header);
 
             // trailer settings
             $hashTotalAccountNumber = $credit_transaction = $debit_transaction = 0;
@@ -408,7 +400,7 @@ class FileController extends Controller
                     $Amount.$Company.$ClientIdentifier.$AccountHolderName.
                     $ActionDate.$CDV_Mode.$EntryClass;
 
-                Storage::disk('local')->append('MercantileCapitec.txt', $std_transaction_record);
+                Storage::disk('local')->append('MercantileCapitec_'.date("Y_m_d").'.txt', $std_transaction_record);
 
                 // trailer record
                 if($key == $total_return -1){
@@ -446,7 +438,7 @@ class FileController extends Controller
                         $debit_transaction.$credit_transaction.$filler.
                         $debitTotal.$creditTotal.$hashTotal;
 
-                    Storage::disk('local')->append('MercantileCapitec.txt', $trailer_record);
+                    Storage::disk('local')->append('MercantileCapitec_'.date("Y_m_d").'.txt', $trailer_record);
                 }
             } // foreach($export as $key => $value){
 
@@ -517,7 +509,7 @@ class FileController extends Controller
             //$myfile = fopen("MercantileNedbank.txt", "w") or die("Unable to open file!");
             //fwrite($myfile, $header->HeaderRow."\n");
             //fclose($myfile);
-            Storage::disk('local')->put('MercantileNedbank.txt', $header->HeaderRow);
+            Storage::disk('local')->put('MercantileNedbank_'.date("Y_m_d").'.txt', $header->HeaderRow);
             //dd('ddee');
             $str_length = strlen($transactionTotalCount);
             $zero = '00000000';
@@ -553,9 +545,9 @@ class FileController extends Controller
                 $v->EntryClass.
                 $v->NominatedAccountReference.$BDF_Indicator.
                 '                                                                           ';
-                Storage::disk('local')->append('MercantileNedbank.txt', $row);
+                Storage::disk('local')->append('MercantileNedbank_'.date("Y_m_d").'.txt', $row);
             }
-            Storage::disk('local')->append('MercantileNedbank.txt', $trailer);
+            Storage::disk('local')->append('MercantileNedbank_'.date("Y_m_d").'.txt', $trailer);
 
             // delete nedbank transactions
             DB::table('mercantile_transactions')
@@ -598,80 +590,111 @@ class FileController extends Controller
                 ->where('Processed', 0)
                 ->update(['Processed' => 1,]);
             
-            $rows = SimpleExcelReader::create($pathToFile, 'xlsx')
-            ->noHeaderRow()
-            ->getRows();
+            $file = fopen($pathToFile,"r");
+            while(! feof($file)){
+                $rowProperties = fgets($file);
+                $RecordIdentifier = substr($rowProperties, 0, 2);
 
-            $rows->each(function(array $rowProperties) {
-                $RecordIdentifier = substr($rowProperties[0], 0, 2);
-                $AccountHolderFullName = substr($rowProperties[0], 124, 30);
-                $explode = explode(" ", $AccountHolderFullName);
-                $AccountHolderSurame = $explode[0];
-                $AccountHolderInitials = trim($explode[1]);
+                if($RecordIdentifier == '02'){
+                    $DestinationBranchCode = substr($rowProperties, 52, 6); 
+                    $Amount = substr($rowProperties, 74, 12);
+                    $PolicyNumber = $ContractReference = substr($rowProperties, 104, 14);
+                    
+                    // capitec branch code 470010
+                    $BankType = 'Capitec';
+                    if($DestinationBranchCode != '470010'){$BankType = 'Nedbank';}
 
-                $DestinationAccountNumber = substr($rowProperties[0], 58, 16); /* User */
-                $DestinationBranchCode = substr($rowProperties[0], 52, 6); /* User */
-                $PaymentReference = substr($rowProperties[0], 18, 34);
-                $TransactionOrder = substr($PaymentReference, 24, 10);
+                    if($BankType == 'Capitec'){
+                        if($RecordIdentifier == '02'){
+                            $check = DB::table('mercantile_user_policies')
+                            ->where('PolicyNumber', '=', $PolicyNumber)
+                            ->where('dummy_data_Capitec_active', '=', '1')
+                            ->first();
 
-                $Amount = substr($rowProperties[0], 74, 12);
-                $ActionDate = substr($rowProperties[0], 86, 8);
-                $TransactionUniqueID = substr($rowProperties[0], 94, 30);
-                $StatementReference = substr($rowProperties[0], 94, 10);
-                $PolicyNumber = $ContractReference = substr($rowProperties[0], 104, 14);
-                $CycleDate = substr($rowProperties[0], 118, 6);
-                
-                $TransactionType = substr($rowProperties[0], 154, 4);
-                $ClientType = substr($rowProperties[0], 158, 2);
-                $ChargesAccountNumber = substr($rowProperties[0], 160, 16); /* Leza */
-                $ServiceType = substr($rowProperties[0], 176, 2);
-                $OriginalPaymentReference = substr($rowProperties[0], 178, 34);
-                $EntryClass = substr($rowProperties[0], 212, 2);
-                $NominatedAccountReference = substr($rowProperties[0], 214, 30);
-                $NominatedAccountNumber = substr($rowProperties[0], 2, 16);
-                $BDF_Indicator = substr($rowProperties[0], 244, 1);
-                
-                // capitec branch code 470010
-                $BankType = 'Capitec';
-                if($DestinationBranchCode != '470010'){$BankType = 'Nedbank';}
+                            if ($check) {
+                                $transacion = DB::table('mercantile_capitec_transactions_archives')
+                                    ->where('policy_id', '=', $PolicyNumber)
+                                    ->where('Processed', '=', '0')
+                                    ->first();
 
-                if($BankType == 'Capitec'){
-                    if($RecordIdentifier == '02'){
-                        $check = DB::table('mercantile_user_policies')
-                        ->where('PolicyNumber', '=', $PolicyNumber)
-                        ->where('dummy_data_Capitec_active', '=', '1')
-                        ->first();
-
-                        if ($check) {
-                            $transacion = DB::table('mercantile_capitec_transactions_archives')
-                                ->where('policy_id', '=', $PolicyNumber)
-                                ->where('Processed', '=', '0')
-                                ->first();
-
-                            DB::table('mercantile_capitec_rejections')->insert(
-                                array(
-                                    'policy_id' => $PolicyNumber,
-                                    'Processed' => '0',
-                                    'transaction_id' => $transacion->id,
-                                    'Amount' => $Amount,
-                                )
-                            );
+                                DB::table('mercantile_capitec_rejections')->insert(
+                                    array(
+                                        'policy_id' => $PolicyNumber,
+                                        'Processed' => '0',
+                                        'transaction_id' => $transacion->id,
+                                        'Amount' => $Amount,
+                                    )
+                                );
+                            }
                         }
                     }
                 }
-            }); 
+            }
             // v Process Rejections v
+            $header = DB::table('mercantile_headers')->first();
+            Storage::disk('local')->put('CapitecRejections_'.date("Y_m_d").'.txt', $header->HeaderRow);
 
+            $export = DB::table('mercantile_capitec_rejections')
+            ->join('mercantile_user_banks', 'mercantile_capitec_rejections.policy_id', '=', 'mercantile_user_banks.policy_id')
+            ->join('mercantile_users', 'mercantile_capitec_rejections.policy_id', '=', 'mercantile_users.policy_id')
+            ->join('mercantile_capitec_transactions_archives', 'mercantile_capitec_rejections.policy_id', '=', 'mercantile_capitec_transactions_archives.policy_id')
+            ->where('mercantile_capitec_rejections.Processed', '=', '0')
+            ->where('mercantile_capitec_transactions_archives.Processed', '=', '0')
+            ->orderBy('TransactionOrder','asc')
+            ->get();
+            $total_return = count($export) - 1;
 
-
-
-            $downloadDocName = 'CapitecRejectionsExport_'.date("Y_m_d").'.xlsx';
-            return Excel::download(new MercantileCapitecRejectionsExport, $downloadDocName);
+            $rejectionsTotal = DB::table('mercantile_capitec_rejections')
+                ->sum('Amount');
             
+            $rejectionsTotal = str_replace(".0","",$rejectionsTotal);
+            $str_length = strlen($rejectionsTotal);
+            $zero = '000000000000000000';
+            $rejectionsTotal = $zero . $rejectionsTotal;
+            $rejectionsTotal = substr($rejectionsTotal, $str_length, 18);
+
+            foreach($export as $key => $v){
+                $RecordIdentifier = $v->RecordIdentifier;
+                $PaymentReference = $v->PaymentReference;
+                $UserBranchCode = $v->UserBranchCode;
+                $UserAccountNumber = $v->UserAccountNumber;
+                $Amount = $v->Amount;
+                $ActionDate = $v->ActionDate;
+                $TransactionUniqueID = $v->TransactionUniqueID;
+                $AccountHolderFullName = $v->AccountHolderFullName;
+                $TransactionType = $v->TransactionType;
+                $ClientType = $v->ClientType;
+                $ServiceType = $v->ServiceType;
+                $OriginalPaymentReference = $v->OriginalPaymentReference;
+                $EntryClass = $v->EntryClass;
+                $NominatedAccountReference = $v->NominatedAccountReference;
+                $BDF_Indicator = $v->BDF_Indicator;
+            
+                $ActionDate = explode("-", $ActionDate);
+                $ActionDate = implode("", $ActionDate);
+
+                $rejectionRecord = 
+                $RecordIdentifier.'0000001454088281'.$PaymentReference.$UserBranchCode.$UserAccountNumber.$Amount.
+                $ActionDate.$TransactionUniqueID.$AccountHolderFullName.$TransactionType.$ClientType.
+                '0000001454088281'.$ServiceType.$OriginalPaymentReference.$EntryClass.$NominatedAccountReference.$BDF_Indicator.
+                '                                                                           ';
+
+                Storage::disk('local')->append('CapitecRejections_'.date("Y_m_d").'.txt', $rejectionRecord);
+
+                if($key == $total_return){
+                    $str_length = strlen($total_return);
+                    $zero = '00000000';
+                    $total_return = $zero . $total_return;
+                    $total_return = substr($total_return, $str_length, 8);
+    
+                    $trailer_record = 
+                        '03'.$total_return.$rejectionsTotal.
+                        '                                                                                                                                                                                                                                                                                                    ';
+                    Storage::disk('local')->append('CapitecRejections_'.date("Y_m_d").'.txt', $trailer_record);
+                }
+            }
             // ^ Process Rejections ^
             return redirect()->route('file-import')->withErrors(['msg' => 'Rejections completed successfully']);
-
-
         }
         return redirect()->route('file-import');
     }
