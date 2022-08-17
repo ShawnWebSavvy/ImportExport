@@ -5,6 +5,7 @@ use App\Http\Controllers\FileController;
 use App\Http\Controllers\MercantileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\Downloads;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,6 +50,9 @@ Route::post('file-export-botswana-totext', [FileController::class, 'fileExportBo
 Route::get('file-export-mercantile-index', [MercantileController::class, 'fileExportMercantileIndex'])->name('file-export-mercantile-index')->middleware('auth')->middleware('admin');
 Route::post('file-export-mercantile-nedbank', [MercantileController::class, 'fileExportMercantileNedbank'])->name('file-export-mercantile-nedbank');
 Route::post('file-export-mercantile-capitec', [MercantileController::class, 'fileExportMercantileCapitec'])->name('file-export-mercantile-capitec');
+
+Route::get('downloadsPage', [Downloads::class, 'mercantileDownloads'])->name('downloadsPage');
+Route::post('download', [Downloads::class, 'download'])->name('download');
 
 // not used, but get so many error if deleted //  vvv // 
 Route::get('file-export-botswana-install-headers-index', [FileController::class, 'fileExportBotswanaInstallHeadersIndex'])->name('file-export-botswana-install-headers-index');

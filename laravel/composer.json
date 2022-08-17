@@ -13,7 +13,8 @@
         "laravel/tinker": "^2.5",
         "maatwebsite/excel": "^3.1",
         "shuchkin/simplexlsx": "^1.0",
-        "spatie/simple-excel": "^1.13"
+        "spatie/simple-excel": "^1.13",
+        "stechstudio/laravel-zipstream": "^4.8"
     },
     "require-dev": {
         "facade/ignition": "^2.5",

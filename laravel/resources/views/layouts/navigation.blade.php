@@ -31,6 +31,9 @@
                     <x-nav-link :href="route('file-export-mercantile-index')">
                         {{ __('Mercantile Records') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('downloadsPage')">
+                        {{ __('Downloads') }}
+                    </x-nav-link>
                 </div>
                 </div>
             </div>
