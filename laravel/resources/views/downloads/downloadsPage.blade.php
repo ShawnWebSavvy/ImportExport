@@ -14,7 +14,7 @@
                         
                         Files available for download: 
                         </br>
-                        @foreach ($arrayFile as $filename)
+                        @foreach ($currentDownloads as $filename)
                             {{ $filename }}, 
                         @endforeach
                         
@@ -26,6 +26,11 @@
                     </div>
                     <div class="col-sm-12">
                         <h5>Archived Downloads</h5>
+                        Archived files available for download: 
+                        </br>
+                        @foreach ($archiveDownloads as $filename)
+                        <a href="{{ route('downloadArchive',$filename) }}">{{ $filename }}</a>; </br>
+                        @endforeach
                     </div>
                 </div>
             </div>

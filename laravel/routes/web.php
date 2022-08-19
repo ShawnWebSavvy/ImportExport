@@ -51,8 +51,9 @@ Route::get('file-export-mercantile-index', [MercantileController::class, 'fileEx
 Route::post('file-export-mercantile-nedbank', [MercantileController::class, 'fileExportMercantileNedbank'])->name('file-export-mercantile-nedbank');
 Route::post('file-export-mercantile-capitec', [MercantileController::class, 'fileExportMercantileCapitec'])->name('file-export-mercantile-capitec');
 
-Route::get('downloadsPage', [Downloads::class, 'mercantileDownloads'])->name('downloadsPage');
+Route::get('downloadsPage', [Downloads::class, 'mercantileDownloads'])->name('downloadsPage')->middleware('auth')->middleware('admin');
 Route::post('download', [Downloads::class, 'download'])->name('download');
+Route::get('downloadArchive/{file}', [Downloads::class, 'downloadArchive'])->name('downloadArchive')->middleware('auth')->middleware('admin');
 
 // not used, but get so many error if deleted //  vvv // 
 Route::get('file-export-botswana-install-headers-index', [FileController::class, 'fileExportBotswanaInstallHeadersIndex'])->name('file-export-botswana-install-headers-index');
