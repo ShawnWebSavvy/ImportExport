@@ -35,15 +35,15 @@ class Downloads extends Controller
     public function download(Request $request){
         // zip folder using terminal - passthru
         $filepath = storage_path('app/downloads/mercantile/current');
-        $zip_file = 'Mercantile.zip';
+        $zip_file = storage_path('app/downloads/mercantile/zip/Mercantile.zip');
         $cmd = '-rm --force --dir --recursive ' . $zip_file . ' ' . $filepath;
         passthru($cmd, $err);
 
         // move files from current download file to archive folder
         $files = Storage::files("downloads/mercantile/current/");
         foreach ($files as $value) {
-            //$filename = str_replace('downloads/mercantile/current/','', $value);
-            //File::move(storage_path('app/downloads/mercantile/current/'.$filename), storage_path('app/downloads/mercantile/archive/'.$filename));
+            $filename = str_replace('downloads/mercantile/current/','', $value);
+            File::move(storage_path('app/downloads/mercantile/current/'.$filename), storage_path('app/downloads/mercantile/archive/'.$filename));
         }
 
         // download the file
