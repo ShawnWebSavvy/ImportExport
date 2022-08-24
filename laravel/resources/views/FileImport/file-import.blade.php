@@ -48,13 +48,15 @@
                                                 <input type="radio" id="CapitecRejections" name="file_type" value="CapitecRejections">
                                                 <label for="CapitecRejections">Capitec Rejections</label><br>
 
+                                                <input type="radio" id="CapitecTestData" name="file_type" value="CapitecTestData">
+                                                <label for="CapitecTestData">Capitec Test Data</label><br>
+
                                                 <input type="radio" id="Botswana" name="file_type" value="Botswana">
                                                 <label for="Botswana">Botswana</label><br>
 
                                                 <input type="radio" id="Namibia" name="file_type" value="Namibia">
                                                 <label for="Namibia">Namibia</label><br>
 
-                                                
                                                 <!--
                                                 <input type="radio" id="BotswanaInstallHeaderRecord" name="file_type" value="BotswanaInstallHeaderRecord">
                                                 <label for="BotswanaInstallHeaderRecord">BotswanaInstallHeaderRecord</label><br>

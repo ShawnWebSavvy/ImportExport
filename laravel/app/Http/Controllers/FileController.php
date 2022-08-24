@@ -135,13 +135,20 @@ class FileController extends Controller
             return redirect()->route('file-export-botswana-index');
         
         } elseif($request->file_type == 'Capitec'){ /* **** Capitec **** */
+            // check if capitec test data loaded
+            $checkTest = DB::table('mercantile_user_policies')
+            ->where('mercantile_user_policies.dummy_data_Capitec_active', '=', '1')
+            ->first();
+            if(!$checkTest){
+                return view('FileImport.file-import')->withErrors(['msg' => 'Please upload the Capitec test data']);
+            }
             // before creating new files in the current folder, move files to archive
             $files = Storage::files("downloads/mercantile/current/");
             foreach ($files as $value) {
                 $file_name = str_replace('downloads/mercantile/current/','', $value);
                 File::move(storage_path('app/downloads/mercantile/current/'.$file_name), storage_path('app/downloads/mercantile/archive/'.$file_name));
             }
-
+            
             $file = fopen($pathToFile,"r");
             while(! feof($file)){
                 $rowProperties = fgets($file);
@@ -241,7 +248,7 @@ class FileController extends Controller
                 }
             }
             fclose($file);
-
+            
             // V Process Capitec  V
             $export = DB::table('mercantile_user_policies')
                 ->join('mercantile_transactions', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_transactions.policy_id')
@@ -250,7 +257,7 @@ class FileController extends Controller
                 ->where('mercantile_user_banks.UserBankType', '=', 'Capitec')
                 ->where('mercantile_user_policies.dummy_data_Capitec_active', '=', '1')
                 ->orderBy('TransactionOrder','asc')
-                ->get();
+                ->get();   
             // debit total
             $debitTotal = DB::table('mercantile_transactions')
                 ->join('mercantile_user_banks', 'mercantile_transactions.policy_id', '=', 'mercantile_user_banks.policy_id')
@@ -267,6 +274,7 @@ class FileController extends Controller
                 ->where('mercantile_user_banks.UserBankType', '=', 'Capitec')
                 ->where('mercantile_user_policies.dummy_data_Capitec_active', '=', '1')
                 ->sum('Amount');
+                
             // Build Header
             // get Dates, now, from and to
             $dateNow = date('Y-m-d');
@@ -286,17 +294,17 @@ class FileController extends Controller
             $actionDateTo = explode("-", $actionDateTo);
             $actionDateTo = implode("", $actionDateTo);
             $actionDateTo = substr($actionDateTo, 2, 6);
-
             //generation number
             $query =  DB::table('generation_numbers')->orderBy('id', 'desc')
                 ->where('bank', 'Capitec')
                 ->first();
+                
             // if database is empty (was unable to set a default value in migration)
             if(!$query){
                 $generation_number = 0001;
             } else {
                 // incremnt the generation number
-                $generation_number = $query->generation_number_botswana + 1;
+                $generation_number = $query->generation_number_capitec + 1;
             }
             // if = 1000000, then reset, as it can only be 4 digits
             if($generation_number == 10000){
@@ -313,7 +321,7 @@ class FileController extends Controller
             ->delete();
             // insert generation number, to keep refernce
             DB::table('generation_numbers')->insert([
-                    'generation_number_botswana' => $generation_number,
+                    'generation_number_capitec' => $generation_number,
                     'bank' => 'Capitec',]
             );
 
@@ -583,6 +591,58 @@ class FileController extends Controller
             */
             // ^ Process Nedbank ^
             return redirect()->route('file-import')->withErrors(['msg' => 'Mercantile transactions processed successfully']);
+        } elseif($request->file_type == 'CapitecTestData'){ /* **** Capitec TestData **** */
+            // check if capitec test data loaded
+            $checkTest = DB::table('mercantile_user_policies')
+            ->where('mercantile_user_policies.dummy_data_Capitec_active', '=', '1')
+            ->first();
+            if($checkTest){
+                return view('FileImport.file-import')->withErrors(['msg' => 'Test Data already populated']);
+            }
+
+            $file = fopen($pathToFile,"r");
+            while(! feof($file)){
+                $rowProperties = fgets($file);
+
+                $PolicyNumber = substr($rowProperties, 104, 14);
+
+                $AccountHolderFullName = substr($rowProperties, 124, 30);
+                $explode = explode(" ", $AccountHolderFullName);
+                $AccountHolderSurame = $explode[0];
+                $AccountHolderInitials = trim($explode[1]);
+                $ClientType = substr($rowProperties, 158, 2);
+
+                $DestinationAccountNumber = substr($rowProperties, 58, 16);
+                $DestinationBranchCode = substr($rowProperties, 52, 6);
+                $BankType = 'Capitec';
+
+                DB::table('mercantile_user_policies')->insert(
+                    array(
+                        'PolicyNumber' => $PolicyNumber,
+                        'dummy_data_Capitec_active' => 1,
+                    )
+                );
+
+                DB::table('mercantile_users')->insert(
+                    array(
+                        'AccountHolderFullName' => $AccountHolderFullName,
+                        'AccountHolderSurame' => $AccountHolderSurame,
+                        'AccountHolderInitials' => $AccountHolderInitials,
+                        'ClientType' => $ClientType,
+                        'policy_id' => $PolicyNumber,
+                    )
+                );
+
+                DB::table('mercantile_user_banks')->insert(
+                    array(
+                        'UserAccountNumber' => $DestinationAccountNumber,
+                        'UserBranchCode' => $DestinationBranchCode,
+                        'UserBankType' => $BankType,
+                        'policy_id' => $PolicyNumber,
+                    )
+                );
+
+            }
         } elseif($request->file_type == 'CapitecRejections'){ /* **** Capitec Rejections **** */
             DB::table('mercantile_capitec_rejections')
                 ->where('Processed', 0)
