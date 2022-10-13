@@ -79,10 +79,9 @@
                                                         <input type="file" name="file" class="custom-file-input" id="customFile">
                                                         <label class="custom-file-label" for="customFile">Choose file</label>
                                                     </div>
-                                                    <button class="btn btn-primary">Import data</button>
+                                                    <button id="btn_import" class="btn btn-primary" onclick="processing(); ">Import data</button>
                                                 </div>
                                             </div>
-                                            
                                         </div>
                                     </div>
                                 </div>
@@ -133,6 +132,8 @@
     </div>
 </x-app-layout>
 
-
-
-
+<script>
+function processing() { 
+    document.getElementById('btn_import').innerHTML = 'Processing';
+}
+</script>
