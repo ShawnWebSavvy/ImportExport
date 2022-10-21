@@ -1,5 +1,10 @@
 @extends('layouts.header') 
-
+<style>
+.disabledbutton {
+    pointer-events: none;
+    opacity: 0.4;
+}
+</style>
 <x-app-layout>
     <x-slot name="header">
     </x-slot>
@@ -79,7 +84,7 @@
                                                         <input type="file" name="file" class="custom-file-input" id="customFile">
                                                         <label class="custom-file-label" for="customFile">Choose file</label>
                                                     </div>
-                                                    <button id="btn_import" class="btn btn-primary" onclick="processing(); ">Import data</button>
+                                                    <button id="btn_import" class="btn btn-primary" onclick="processing();">Import data</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -135,5 +140,6 @@
 <script>
 function processing() { 
     document.getElementById('btn_import').innerHTML = 'Processing';
+    document.getElementById('btn_import').classList.add("disabledbutton");
 }
 </script>
