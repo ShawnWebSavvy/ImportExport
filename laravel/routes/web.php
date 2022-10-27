@@ -50,6 +50,7 @@ Route::post('file-export-botswana-totext', [FileController::class, 'fileExportBo
 Route::get('file-export-mercantile-index', [MercantileController::class, 'fileExportMercantileIndex'])->name('file-export-mercantile-index')->middleware('auth')->middleware('admin');
 Route::post('file-export-mercantile-nedbank', [MercantileController::class, 'fileExportMercantileNedbank'])->name('file-export-mercantile-nedbank');
 Route::post('file-export-mercantile-capitec', [MercantileController::class, 'fileExportMercantileCapitec'])->name('file-export-mercantile-capitec');
+Route::get('trialData-mercantile-capitec', [MercantileController::class, 'trialDataMercantileCapitec'])->name('trialData-mercantile-capitec');
 
 Route::get('downloadsPage', [Downloads::class, 'mercantileDownloads'])->name('downloadsPage')->middleware('auth')->middleware('admin');
 Route::post('download', [Downloads::class, 'download'])->name('download');

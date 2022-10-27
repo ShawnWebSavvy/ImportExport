@@ -363,6 +363,17 @@ class MercantileController extends Controller
         } 
     }
 
+    public function trialDataMercantileCapitec(){
+        return view('Mercantile.capitec-test-stats', [
+            'capitecQuery' => DB::table('mercantile_user_policies')
+            ->join('mercantile_users', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_users.policy_id')
+            ->join('mercantile_user_banks', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_user_banks.policy_id')
+            ->where('mercantile_user_banks.UserBankType', '=', 'Capitec')
+            ->where('mercantile_user_policies.dummy_data_Capitec_active', '=', '1')
+            ->paginate(50),
+        ]);
+    }
+
     public function index()
     {
         //

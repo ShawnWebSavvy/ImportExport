@@ -258,238 +258,241 @@ class FileController extends Controller
                 ->where('mercantile_user_policies.dummy_data_Capitec_active', '=', '1')
                 ->orderBy('TransactionOrder','asc')
                 ->get();   
-            // debit total
-            $debitTotal = DB::table('mercantile_transactions')
-                ->join('mercantile_user_banks', 'mercantile_transactions.policy_id', '=', 'mercantile_user_banks.policy_id')
-                ->join('mercantile_user_policies', 'mercantile_transactions.policy_id', '=', 'mercantile_user_policies.PolicyNumber')
-                ->where('TransactionType', '=', '0000')
-                ->where('mercantile_user_banks.UserBankType', '=', 'Capitec')
-                ->where('mercantile_user_policies.dummy_data_Capitec_active', '=', '1')
-                ->sum('Amount');
-            // credit total
-            $creditTotal = DB::table('mercantile_transactions')
-                ->join('mercantile_user_banks', 'mercantile_transactions.policy_id', '=', 'mercantile_user_banks.policy_id')
-                ->join('mercantile_user_policies', 'mercantile_transactions.policy_id', '=', 'mercantile_user_policies.PolicyNumber')
-                ->where('TransactionType', '=', '9999')
-                ->where('mercantile_user_banks.UserBankType', '=', 'Capitec')
-                ->where('mercantile_user_policies.dummy_data_Capitec_active', '=', '1')
-                ->sum('Amount');
-                
-            // Build Header
-            // get Dates, now, from and to
-            $dateNow = date('Y-m-d');
-            $dateNow = explode("-", $dateNow);
-            $dateNow = implode("", $dateNow);
-            $dateNow = substr($dateNow, 2, 6);
-            // Action Date from
-            $first_row = $export[0];
-            $actionDateFrom = $first_row->ActionDate;
-            $actionDateFrom = explode("-", $actionDateFrom);
-            $actionDateFrom = implode("", $actionDateFrom);
-            $actionDateFrom = substr($actionDateFrom, 2, 6);
-            // Action Date to
-            $total_return = count($export);
-            $data = $export[$total_return - 1];
-            $actionDateTo = $data->ActionDate;
-            $actionDateTo = explode("-", $actionDateTo);
-            $actionDateTo = implode("", $actionDateTo);
-            $actionDateTo = substr($actionDateTo, 2, 6);
-            //generation number
-            $query =  DB::table('generation_numbers')->orderBy('id', 'desc')
-                ->where('bank', 'Capitec')
-                ->first();
-                
-            // if database is empty (was unable to set a default value in migration)
-            if(!$query){
-                $generation_number = 0001;
-            } else {
-                // incremnt the generation number
-                $generation_number = $query->generation_number_capitec + 1;
-            }
-            // if = 1000000, then reset, as it can only be 4 digits
-            if($generation_number == 10000){
-                $generation_number = 1;
-            }
-            // after increment, number can be less than 4 digits, so check and add back the 0's
-            $str_length = strlen($generation_number);
-            $zero = '0000';
-            $generation_number = $zero . $generation_number;
-            $generation_number = substr($generation_number, $str_length, 4);
-            //delete rows that are not required
-            DB::table('generation_numbers')
-            ->where('bank', 'Capitec',)
-            ->delete();
-            // insert generation number, to keep refernce
-            DB::table('generation_numbers')->insert([
-                    'generation_number_capitec' => $generation_number,
-                    'bank' => 'Capitec',]
-            );
-
-            // write header to text file
-            // use 'w' to clear text file, other inserts will b 'a'
-            $header = 'H04Test'.$dateNow.$dateNow.$actionDateFrom.$actionDateTo.'000001'.$generation_number.'TWObDAYbbb'.'01';
-            Storage::put('downloads/mercantile/current/MercantileCapitec_'.date("Y_m_d").'.txt', $header);
-
-            // trailer settings
-            $hashTotalAccountNumber = $credit_transaction = $debit_transaction = 0;
-            // trailer settings
-
-            //$myfile = fopen("MercantileCapitec.txt", "a") or die("Unable to open file!");
-            // build transaction records
-            foreach($export as $key => $value){
-                $TransactionType = $value->TransactionType;
-                if($TransactionType == '0000'){
-                    $TransactionType = 'T';
-                    $debit_transaction = $debit_transaction +1;
-                }else if($TransactionType == '9999'){
-                    $TransactionType = 'C';
-                    $credit_transaction = $credit_transaction +1;
-                }else{
-                    // incase both dont match, then set default value
-                    $TransactionType = '0';
+            // check if value returned, skip all if not
+            if(count($export) != 0){
+                // debit total
+                $debitTotal = DB::table('mercantile_transactions')
+                    ->join('mercantile_user_banks', 'mercantile_transactions.policy_id', '=', 'mercantile_user_banks.policy_id')
+                    ->join('mercantile_user_policies', 'mercantile_transactions.policy_id', '=', 'mercantile_user_policies.PolicyNumber')
+                    ->where('TransactionType', '=', '0000')
+                    ->where('mercantile_user_banks.UserBankType', '=', 'Capitec')
+                    ->where('mercantile_user_policies.dummy_data_Capitec_active', '=', '1')
+                    ->sum('Amount');
+                // credit total
+                $creditTotal = DB::table('mercantile_transactions')
+                    ->join('mercantile_user_banks', 'mercantile_transactions.policy_id', '=', 'mercantile_user_banks.policy_id')
+                    ->join('mercantile_user_policies', 'mercantile_transactions.policy_id', '=', 'mercantile_user_policies.PolicyNumber')
+                    ->where('TransactionType', '=', '9999')
+                    ->where('mercantile_user_banks.UserBankType', '=', 'Capitec')
+                    ->where('mercantile_user_policies.dummy_data_Capitec_active', '=', '1')
+                    ->sum('Amount');
+                    
+                // Build Header
+                // get Dates, now, from and to
+                $dateNow = date('Y-m-d');
+                $dateNow = explode("-", $dateNow);
+                $dateNow = implode("", $dateNow);
+                $dateNow = substr($dateNow, 2, 6);
+                // Action Date from
+                $first_row = $export[0];
+                $actionDateFrom = $first_row->ActionDate;
+                $actionDateFrom = explode("-", $actionDateFrom);
+                $actionDateFrom = implode("", $actionDateFrom);
+                $actionDateFrom = substr($actionDateFrom, 2, 6);
+                // Action Date to
+                $total_return = count($export);
+                $data = $export[$total_return - 1];
+                $actionDateTo = $data->ActionDate;
+                $actionDateTo = explode("-", $actionDateTo);
+                $actionDateTo = implode("", $actionDateTo);
+                $actionDateTo = substr($actionDateTo, 2, 6);
+                //generation number
+                $query =  DB::table('generation_numbers')->orderBy('id', 'desc')
+                    ->where('bank', 'Capitec')
+                    ->first();
+                    
+                // if database is empty (was unable to set a default value in migration)
+                if(!$query){
+                    $generation_number = 0001;
+                } else {
+                    // incremnt the generation number
+                    $generation_number = $query->generation_number_capitec + 1;
                 }
-                $UserBranchCode = $value->UserBranchCode;
-                $UserAccountNumber = $value->UserAccountNumber;
-                $Amount = $value->Amount;
-                $PolicyNumber = $value->PolicyNumber;
-                $AccountHolderName = $value->AccountHolderFullName;
-
-                $ActionDate = $value->ActionDate;
-                $ActionDate = explode("-", $ActionDate);
-                $ActionDate = implode("", $ActionDate);
-                $ActionDate = substr($ActionDate, 2, 8);
-
-                //account number must be 13 characters :: from database is 16 characters
-                // so, will add 13 zeros to the account number, to ensure the account number is 13 characters
-                $zero = '0000000000000';
-                $UserAccountNumber = $zero . $UserAccountNumber;
-                // now we need the last 13 characters of this string
-                $str_length = strlen($UserAccountNumber) - 13;
-                $UserAccountNumber = substr($UserAccountNumber, $str_length, 13);
-
-                $AccountType = '1';
-                $Company = 'SCORPION';
-                $CDV_Mode = '0';
-                $EntryClass = '32'; 
-
-                // VVV set the specif length of each variable VVV //
-                $Amount = str_replace(".","",$Amount);
-                $str_length = strlen($Amount);
-                $zero = '00000000000';
-                $Amount = $zero . $Amount;
-                $Amount = substr($Amount, $str_length, 11);
-
-                $debitTotal = str_replace(".0","",$debitTotal);
-                $str_length = strlen($debitTotal);
-                $zero = '000000000000';
-                $debitTotal = $zero . $debitTotal;
-                $debitTotal = substr($debitTotal, $str_length, 12);
-
-                $creditTotal = str_replace(".0","",$creditTotal);
-                $str_length = strlen($creditTotal);
-                $zero = '000000000000';
-                $creditTotal = $zero . $creditTotal;
-                $creditTotal = substr($creditTotal, $str_length, 12);
-
-                $spaces = '          '; // 10
-                $Company = $Company . $spaces;
-                $Company = substr($Company, 0, 10);
-
-                $ClientIdentifier = $PolicyNumber;
-                $spaces = '                    '; // 20
-                $ClientIdentifier = $ClientIdentifier . $spaces;
-                $ClientIdentifier = substr($ClientIdentifier, 0, 20);
-
-                $spaces = '                              '; // 30
-                $AccountHolderName = $AccountHolderName . $spaces;
-                $AccountHolderName = substr($AccountHolderName, 0, 30);
-                // ^^^ set the specif length of each variable ^^^ //
-
-                $hashTotalAccountNumber = $hashTotalAccountNumber + $UserAccountNumber;
-
-                // build standard transaction row
-                $std_transaction_record = 
-                    $TransactionType.$UserBranchCode.$UserAccountNumber.$AccountType.
-                    $Amount.$Company.$ClientIdentifier.$AccountHolderName.
-                    $ActionDate.$CDV_Mode.$EntryClass;
-
-                Storage::append('downloads/mercantile/current//MercantileCapitec_'.date("Y_m_d").'.txt', $std_transaction_record);
-
-                // trailer record
-                if($key == $total_return -1){
-                    $record_id = 'Z92';
-                    $user_code = 'Test';
-                    $filler = '000001';
-                    $sequenceNumber = $total_return +1;
-                    // sequance number must be 6 digits
-                    $str_length = strlen($sequenceNumber);
-                    $zero = '000000';
-                    $sequenceNumber = $zero . $sequenceNumber;
-                    $sequenceNumber = substr($sequenceNumber, $str_length, 6);
-
-                    // debit and credit transaction  total count must be 6 digits
-                    $str_length = strlen($debit_transaction);
-                    $zero = '000000';
-                    $debit_transaction = $zero . $debit_transaction;
-                    $debit_transaction = substr($debit_transaction, $str_length, 6);
-                    // debit and credit transaction  total count must be 6 digits
-                    $str_length = strlen($credit_transaction);
-                    $zero = '000000';
-                    $credit_transaction = $zero . $credit_transaction;
-                    $credit_transaction = substr($credit_transaction, $str_length, 6);
-
-                    $hashTotal = $hashTotalAccountNumber;
-                    $str_length = strlen($hashTotal);
-                    $zero = '0000000000000000';
-                    $hashTotal = $zero . $hashTotal;
-                    $hashTotal = substr($hashTotal, $str_length, 16);
-
-                    // build trailer row
-                    $trailer_record = 
-                        $record_id.$user_code.$filler.$sequenceNumber.
-                        $actionDateFrom.$actionDateTo.
-                        $debit_transaction.$credit_transaction.$filler.
-                        $debitTotal.$creditTotal.$hashTotal;
-
-                    Storage::append('downloads/mercantile/current//MercantileCapitec_'.date("Y_m_d").'.txt', $trailer_record);
+                // if = 1000000, then reset, as it can only be 4 digits
+                if($generation_number == 10000){
+                    $generation_number = 1;
                 }
-            } // foreach($export as $key => $value){
-
-            // delete and push to archive
-            DB::table('mercantile_transactions')
-            ->join('mercantile_user_banks', 'mercantile_transactions.policy_id', '=', 'mercantile_user_banks.policy_id')
-            ->join('mercantile_user_policies', 'mercantile_transactions.policy_id', '=', 'mercantile_user_policies.PolicyNumber')
-            ->where('mercantile_user_banks.UserBankType', '=', 'Capitec')
-            ->where('mercantile_user_policies.dummy_data_Capitec_active', '=', '1')
-            ->delete();
-
-            // update previouse records to processed = 1, to filter new records easier for rejections
-            DB::table('mercantile_capitec_transactions_archives')
-                ->where('Processed', 0)
-                ->update(['Processed' => 1,]);
-
-            foreach($export as $value){
-                DB::table('mercantile_capitec_transactions_archives')->insert(
-                    array(
-                        'RecordIdentifier' => $value->RecordIdentifier,
-                        'PaymentReference' => $value->PaymentReference,
-                        'Amount' => $value->Amount,
-                        'ActionDate' => $value->ActionDate,
-                        'TransactionUniqueID' => $value->TransactionUniqueID,
-                        'StatementReference' => $value->StatementReference,
-                        'CycleDate' => $value->CycleDate,
-                        'TransactionType' => $value->TransactionType,
-                        'TransactionOrder' => $value->TransactionOrder,
-                        'ServiceType' => $value->ServiceType,
-                        'OriginalPaymentReference' => $value->OriginalPaymentReference,
-                        'EntryClass' => $value->EntryClass,
-                        'NominatedAccountReference' => $value->NominatedAccountReference,
-                        'BDF_Indicator' => $value->BDF_Indicator,
-                        'policy_id' => $value->policy_id,
-                        'Processed' => 0,
-                    )
+                // after increment, number can be less than 4 digits, so check and add back the 0's
+                $str_length = strlen($generation_number);
+                $zero = '0000';
+                $generation_number = $zero . $generation_number;
+                $generation_number = substr($generation_number, $str_length, 4);
+                //delete rows that are not required
+                DB::table('generation_numbers')
+                ->where('bank', 'Capitec',)
+                ->delete();
+                // insert generation number, to keep refernce
+                DB::table('generation_numbers')->insert([
+                        'generation_number_capitec' => $generation_number,
+                        'bank' => 'Capitec',]
                 );
-            } 
+
+                // write header to text file
+                // use 'w' to clear text file, other inserts will b 'a'
+                $header = 'H04Test'.$dateNow.$dateNow.$actionDateFrom.$actionDateTo.'000001'.$generation_number.'TWObDAYbbb'.'01';
+                Storage::put('downloads/mercantile/current/MercantileCapitec_'.date("Y_m_d").'.txt', $header);
+
+                // trailer settings
+                $hashTotalAccountNumber = $credit_transaction = $debit_transaction = 0;
+                // trailer settings
+
+                //$myfile = fopen("MercantileCapitec.txt", "a") or die("Unable to open file!");
+                // build transaction records
+                foreach($export as $key => $value){
+                    $TransactionType = $value->TransactionType;
+                    if($TransactionType == '0000'){
+                        $TransactionType = 'T';
+                        $debit_transaction = $debit_transaction +1;
+                    }else if($TransactionType == '9999'){
+                        $TransactionType = 'C';
+                        $credit_transaction = $credit_transaction +1;
+                    }else{
+                        // incase both dont match, then set default value
+                        $TransactionType = '0';
+                    }
+                    $UserBranchCode = $value->UserBranchCode;
+                    $UserAccountNumber = $value->UserAccountNumber;
+                    $Amount = $value->Amount;
+                    $PolicyNumber = $value->PolicyNumber;
+                    $AccountHolderName = $value->AccountHolderFullName;
+
+                    $ActionDate = $value->ActionDate;
+                    $ActionDate = explode("-", $ActionDate);
+                    $ActionDate = implode("", $ActionDate);
+                    $ActionDate = substr($ActionDate, 2, 8);
+
+                    //account number must be 13 characters :: from database is 16 characters
+                    // so, will add 13 zeros to the account number, to ensure the account number is 13 characters
+                    $zero = '0000000000000';
+                    $UserAccountNumber = $zero . $UserAccountNumber;
+                    // now we need the last 13 characters of this string
+                    $str_length = strlen($UserAccountNumber) - 13;
+                    $UserAccountNumber = substr($UserAccountNumber, $str_length, 13);
+
+                    $AccountType = '1';
+                    $Company = 'SCORPION';
+                    $CDV_Mode = '0';
+                    $EntryClass = '32'; 
+
+                    // VVV set the specif length of each variable VVV //
+                    $Amount = str_replace(".","",$Amount);
+                    $str_length = strlen($Amount);
+                    $zero = '00000000000';
+                    $Amount = $zero . $Amount;
+                    $Amount = substr($Amount, $str_length, 11);
+
+                    $debitTotal = str_replace(".0","",$debitTotal);
+                    $str_length = strlen($debitTotal);
+                    $zero = '000000000000';
+                    $debitTotal = $zero . $debitTotal;
+                    $debitTotal = substr($debitTotal, $str_length, 12);
+
+                    $creditTotal = str_replace(".0","",$creditTotal);
+                    $str_length = strlen($creditTotal);
+                    $zero = '000000000000';
+                    $creditTotal = $zero . $creditTotal;
+                    $creditTotal = substr($creditTotal, $str_length, 12);
+
+                    $spaces = '          '; // 10
+                    $Company = $Company . $spaces;
+                    $Company = substr($Company, 0, 10);
+
+                    $ClientIdentifier = $PolicyNumber;
+                    $spaces = '                    '; // 20
+                    $ClientIdentifier = $ClientIdentifier . $spaces;
+                    $ClientIdentifier = substr($ClientIdentifier, 0, 20);
+
+                    $spaces = '                              '; // 30
+                    $AccountHolderName = $AccountHolderName . $spaces;
+                    $AccountHolderName = substr($AccountHolderName, 0, 30);
+                    // ^^^ set the specif length of each variable ^^^ //
+
+                    $hashTotalAccountNumber = $hashTotalAccountNumber + $UserAccountNumber;
+
+                    // build standard transaction row
+                    $std_transaction_record = 
+                        $TransactionType.$UserBranchCode.$UserAccountNumber.$AccountType.
+                        $Amount.$Company.$ClientIdentifier.$AccountHolderName.
+                        $ActionDate.$CDV_Mode.$EntryClass;
+
+                    Storage::append('downloads/mercantile/current//MercantileCapitec_'.date("Y_m_d").'.txt', $std_transaction_record);
+
+                    // trailer record
+                    if($key == $total_return -1){
+                        $record_id = 'Z92';
+                        $user_code = 'Test';
+                        $filler = '000001';
+                        $sequenceNumber = $total_return +1;
+                        // sequance number must be 6 digits
+                        $str_length = strlen($sequenceNumber);
+                        $zero = '000000';
+                        $sequenceNumber = $zero . $sequenceNumber;
+                        $sequenceNumber = substr($sequenceNumber, $str_length, 6);
+
+                        // debit and credit transaction  total count must be 6 digits
+                        $str_length = strlen($debit_transaction);
+                        $zero = '000000';
+                        $debit_transaction = $zero . $debit_transaction;
+                        $debit_transaction = substr($debit_transaction, $str_length, 6);
+                        // debit and credit transaction  total count must be 6 digits
+                        $str_length = strlen($credit_transaction);
+                        $zero = '000000';
+                        $credit_transaction = $zero . $credit_transaction;
+                        $credit_transaction = substr($credit_transaction, $str_length, 6);
+
+                        $hashTotal = $hashTotalAccountNumber;
+                        $str_length = strlen($hashTotal);
+                        $zero = '0000000000000000';
+                        $hashTotal = $zero . $hashTotal;
+                        $hashTotal = substr($hashTotal, $str_length, 16);
+
+                        // build trailer row
+                        $trailer_record = 
+                            $record_id.$user_code.$filler.$sequenceNumber.
+                            $actionDateFrom.$actionDateTo.
+                            $debit_transaction.$credit_transaction.$filler.
+                            $debitTotal.$creditTotal.$hashTotal;
+
+                        Storage::append('downloads/mercantile/current//MercantileCapitec_'.date("Y_m_d").'.txt', $trailer_record);
+                    }
+                } // foreach($export as $key => $value){
+
+                // delete and push to archive
+                DB::table('mercantile_transactions')
+                ->join('mercantile_user_banks', 'mercantile_transactions.policy_id', '=', 'mercantile_user_banks.policy_id')
+                ->join('mercantile_user_policies', 'mercantile_transactions.policy_id', '=', 'mercantile_user_policies.PolicyNumber')
+                ->where('mercantile_user_banks.UserBankType', '=', 'Capitec')
+                ->where('mercantile_user_policies.dummy_data_Capitec_active', '=', '1')
+                ->delete();
+
+                // update previouse records to processed = 1, to filter new records easier for rejections
+                DB::table('mercantile_capitec_transactions_archives')
+                    ->where('Processed', 0)
+                    ->update(['Processed' => 1,]);
+
+                foreach($export as $value){
+                    DB::table('mercantile_capitec_transactions_archives')->insert(
+                        array(
+                            'RecordIdentifier' => $value->RecordIdentifier,
+                            'PaymentReference' => $value->PaymentReference,
+                            'Amount' => $value->Amount,
+                            'ActionDate' => $value->ActionDate,
+                            'TransactionUniqueID' => $value->TransactionUniqueID,
+                            'StatementReference' => $value->StatementReference,
+                            'CycleDate' => $value->CycleDate,
+                            'TransactionType' => $value->TransactionType,
+                            'TransactionOrder' => $value->TransactionOrder,
+                            'ServiceType' => $value->ServiceType,
+                            'OriginalPaymentReference' => $value->OriginalPaymentReference,
+                            'EntryClass' => $value->EntryClass,
+                            'NominatedAccountReference' => $value->NominatedAccountReference,
+                            'BDF_Indicator' => $value->BDF_Indicator,
+                            'policy_id' => $value->policy_id,
+                            'Processed' => 0,
+                        )
+                    );
+                } 
+            }
             // ^ Process Capitec ^
             // V Process Nedbank  V
             $export = DB::table('mercantile_user_policies')

@@ -22,6 +22,7 @@
                     <x-nav-link :href="route('file-import')">
                         {{ __('File Import') }}
                     </x-nav-link>
+                    <!--
                     <x-nav-link :href="route('file-export-namibia-index')">
                         {{ __('Namibia Records') }}
                     </x-nav-link>
@@ -31,8 +32,12 @@
                     <x-nav-link :href="route('file-export-mercantile-index')">
                         {{ __('Mercantile Records') }}
                     </x-nav-link>
+                    -->
                     <x-nav-link :href="route('downloadsPage')">
                         {{ __('Downloads') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('trialData-mercantile-capitec')">
+                        {{ __('Capitec Stats') }}
                     </x-nav-link>
                 </div>
                 </div>
