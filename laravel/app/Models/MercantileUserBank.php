@@ -15,4 +15,12 @@ class MercantileUserBank extends Model
         'UserBankType',
         'policy_id',
     ];
+
+    public static function addNew($data){
+        self::upsert(
+            $data, ['policy_id'], ['policy_id', 'UserAccountNumber', 'UserBranchCode', 'UserBankType']
+        );
+    }
+
+    
 }

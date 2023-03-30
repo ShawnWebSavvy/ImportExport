@@ -16,4 +16,15 @@ class MercantileUser extends Model
         'ClientType',
         'policy_id',
     ];
+
+    public static function addNew($data){
+        self::upsert(
+            $data, ['policy_id'], ['policy_id', 'AccountHolderFullName', 'AccountHolderSurame', 'AccountHolderInitials', 'ClientType']
+        );
+    }
 }
+/*
+self::upsert(
+    $data, ['PolicyNumber'], ['PolicyNumber', 'dummy_data_Capitec_active']
+);
+*/
