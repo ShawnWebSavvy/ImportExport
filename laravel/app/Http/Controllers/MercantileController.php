@@ -41,7 +41,7 @@ class MercantileController extends Controller
             ->join('mercantile_transactions', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_transactions.policy_id')
             ->join('mercantile_users', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_users.policy_id')
             ->join('mercantile_user_banks', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_user_banks.policy_id')
-            ->where('mercantile_user_banks.UserBankType', '=', 'Nedbank')
+            //->where('mercantile_user_banks.UserBankType', '=', 'Nedbank')
             //->where('mercantile_transactions.Processed', '=', '0')
             ->paginate(20),
         ]);
@@ -63,7 +63,7 @@ class MercantileController extends Controller
         ->join('mercantile_user_banks', 'mercantile_transactions.policy_id', '=', 'mercantile_user_banks.policy_id')
         ->where('mercantile_user_banks.UserBankType', '=', 'Nedbank')
         ->sum('Amount');
-        
+        /*
         $header = DB::table('mercantile_headers')->first();
         
         $myfile = fopen("MercantileNedbank.txt", "w") or die("Unable to open file!");
@@ -104,7 +104,7 @@ class MercantileController extends Controller
         }
         fwrite($myfile, $trailer);
         fclose($myfile);
-
+        */
         // delete nedbank transactions
         DB::table('mercantile_transactions')
         ->join('mercantile_user_banks', 'mercantile_transactions.policy_id', '=', 'mercantile_user_banks.policy_id')
@@ -365,11 +365,11 @@ class MercantileController extends Controller
 
     public function trialDataMercantileCapitec(){
         return view('Mercantile.capitec-test-stats', [
-            'capitecQuery' => DB::table('mercantile_user_policies')
-            ->join('mercantile_users', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_users.policy_id')
-            ->join('mercantile_user_banks', 'mercantile_user_policies.PolicyNumber', '=', 'mercantile_user_banks.policy_id')
+            'capitecQuery' => DB::table('capitec_accounts1000s')
+            ->join('mercantile_users', 'capitec_accounts1000s.PolicyNumber', '=', 'mercantile_users.policy_id')
+            ->join('mercantile_user_banks', 'capitec_accounts1000s.PolicyNumber', '=', 'mercantile_user_banks.policy_id')
             ->where('mercantile_user_banks.UserBankType', '=', 'Capitec')
-            ->where('mercantile_user_policies.dummy_data_Capitec_active', '=', '1')
+            ->where('capitec_accounts1000s.dummy_data_Capitec_active', '=', '1')
             ->paginate(50),
         ]);
     }
