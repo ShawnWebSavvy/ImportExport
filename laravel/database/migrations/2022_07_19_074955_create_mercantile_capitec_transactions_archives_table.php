@@ -34,7 +34,7 @@ class CreateMercantileCapitecTransactionsArchivesTable extends Migration
             $table->char('BDF_Indicator', 1)->nullable();
 
             $table->string('policy_id', 20);
-            $table->foreign('policy_id')->references('PolicyNumber')->on('mercantile_user_policies')->onDelete('cascade');
+            //$table->foreign('policy_id')->references('PolicyNumber')->on('mercantile_user_policies')->onDelete('cascade');
 
             $table->boolean('Processed', 1)->nullable();
 

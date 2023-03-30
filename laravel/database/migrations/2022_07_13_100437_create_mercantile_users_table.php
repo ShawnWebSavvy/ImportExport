@@ -22,7 +22,7 @@ class CreateMercantileUsersTable extends Migration
 
             $table->char('ClientType', 2)->nullable();
             
-            $table->string('policy_id', 20);
+            $table->string('policy_id', 20)->nullable()->unique();;
             $table->foreign('policy_id')->references('PolicyNumber')->on('mercantile_user_policies')->onDelete('cascade');
 
             

@@ -20,7 +20,7 @@ class CreateMercantileUserBanksTable extends Migration
             $table->char('UserBranchCode', 6)->nullable();
             $table->string('UserBankType', 20)->nullable();
             
-            $table->string('policy_id', 20);
+            $table->string('policy_id', 20)->nullable()->unique();
             $table->foreign('policy_id')->references('PolicyNumber')->on('mercantile_user_policies')->onDelete('cascade');
 
             $table->timestamp('created_at')->useCurrent();

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateMercantileCapitecRejectionsTable extends Migration
+class CreateMercantileTransactionRejectionsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,17 +13,16 @@ class CreateMercantileCapitecRejectionsTable extends Migration
      */
     public function up()
     {
-        Schema::create('mercantile_capitec_rejections', function (Blueprint $table) {
+        Schema::create('mercantile_transaction_rejections', function (Blueprint $table) {
             $table->increments('id')->length(10)->unsigned();
             
             $table->string('policy_id', 20);
             $table->foreign('policy_id')->references('PolicyNumber')->on('mercantile_user_policies')->onDelete('cascade');
 
-            $table->integer('transaction_id')->length(10)->unsigned()->index()->nullable(false);
-            $table->foreign('transaction_id')->references('id')->on('mercantile_capitec_transactions_archives');
-            $table->char('Amount', 12)->nullable();
-            
-            $table->boolean('Processed', 0)->nullable();
+            //$table->integer('transaction_id')->length(10)->unsigned()->index()->nullable(false);
+            //$table->foreign('transaction_id')->references('id')->on('mercantile_transactions')->onDelete('cascade');
+
+            $table->boolean('Processed', 1)->nullable();
 
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent();
@@ -37,6 +36,6 @@ class CreateMercantileCapitecRejectionsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('mercantile_capitec_rejections');
+        Schema::dropIfExists('mercantile_transaction_rejections');
     }
 }
