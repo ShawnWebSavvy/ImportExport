@@ -17,6 +17,8 @@ use App\Http\Controllers\Downloads;
 | contains the "web" middleware group. Now create something great!
 |
 */
+
+
 Route::get('/welcome', function () {
     return view('FileImport.file-import');
 })->middleware(['auth'])->middleware('admin')->name('dashboard');
@@ -25,27 +27,21 @@ Route::get('/', function () {
     return view('FileImport.file-import');
 })->middleware(['auth'])->middleware('admin')->name('dashboard');
 
+
 Route::get('/dashboard', function () {
-    //return view('dashboard');
     return view('FileImport.file-import');
 })->middleware(['auth'])->middleware('admin')->name('dashboard');
 
 require __DIR__.'/auth.php';
 
 Route::get('file-import', [FileController::class, 'fileImportIndex'])->name('file-import')->middleware('auth')->middleware('admin');
-Route::post('file-upload', [FileController::class, 'fileUpload'])->name('file-upload');
+
+Route::post('file-upload', [FileController::class, 'fileUpload_Simple'])->name('file-upload');
+
 Route::get('file-export-index', [FileController::class, 'fileExportIndex'])->name('file-export-index');
 
 Route::get('file-export-index', [FileController::class, 'fileExportIndex'])->name('file-export-index');
 Route::post('file-export', [FileController::class, 'fileExport'])->name('file-export');
-
-Route::get('file-export-namibia-index', [FileController::class, 'fileExportNamibiaIndex'])->name('file-export-namibia-index')->middleware('auth')->middleware('admin');
-Route::post('file-export-namibia', [FileController::class, 'fileExportNamibia'])->name('file-export-namibia');
-Route::get('file-delete-namibia', [FileController::class, 'FileDeleteNamibia'])->name('file-delete-namibia');
-
-Route::get('file-export-botswana-index', [FileController::class, 'fileExportBotswanaIndex'])->name('file-export-botswana-index')->middleware('auth')->middleware('admin');
-Route::post('file-export-botswana', [FileController::class, 'fileExportBotswana'])->name('file-export-botswana');
-Route::post('file-export-botswana-totext', [FileController::class, 'fileExportBotswanaToText'])->name('file-export-botswana-totext');
 
 Route::get('file-export-mercantile-index', [MercantileController::class, 'fileExportMercantileIndex'])->name('file-export-mercantile-index')->middleware('auth')->middleware('admin');
 Route::post('file-export-mercantile-nedbank', [MercantileController::class, 'fileExportMercantileNedbank'])->name('file-export-mercantile-nedbank');
@@ -55,6 +51,65 @@ Route::get('trialData-mercantile-capitec', [MercantileController::class, 'trialD
 Route::get('downloadsPage', [Downloads::class, 'mercantileDownloads'])->name('downloadsPage')->middleware('auth')->middleware('admin');
 Route::post('download', [Downloads::class, 'download'])->name('download');
 Route::get('downloadArchive/{file}', [Downloads::class, 'downloadArchive'])->name('downloadArchive')->middleware('auth')->middleware('admin');
+Route::get('downloadCurrent/{file}', [Downloads::class, 'downloadCurrent'])->name('downloadCurrent')->middleware('auth')->middleware('admin');
+Route::get('rejectionsCurrent/{file}', [Downloads::class, 'downloadrejectionsCurrent'])->name('rejectionsCurrent')->middleware('auth')->middleware('admin');
+Route::get('rejectionsArchive/{file}', [Downloads::class, 'downloadrejectionsArchive'])->name('rejectionsArchive')->middleware('auth')->middleware('admin');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Route::get('file-export-namibia-index', [FileController::class, 'fileExportNamibiaIndex'])->name('file-export-namibia-index')->middleware('auth')->middleware('admin');
+Route::post('file-export-namibia', [FileController::class, 'fileExportNamibia'])->name('file-export-namibia');
+Route::get('file-delete-namibia', [FileController::class, 'FileDeleteNamibia'])->name('file-delete-namibia');
+
+Route::get('file-export-botswana-index', [FileController::class, 'fileExportBotswanaIndex'])->name('file-export-botswana-index')->middleware('auth')->middleware('admin');
+Route::post('file-export-botswana', [FileController::class, 'fileExportBotswana'])->name('file-export-botswana');
+Route::post('file-export-botswana-totext', [FileController::class, 'fileExportBotswanaToText'])->name('file-export-botswana-totext');
 
 // not used, but get so many error if deleted //  vvv // 
 Route::get('file-export-botswana-install-headers-index', [FileController::class, 'fileExportBotswanaInstallHeadersIndex'])->name('file-export-botswana-install-headers-index');
